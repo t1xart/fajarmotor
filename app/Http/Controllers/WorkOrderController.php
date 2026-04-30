@@ -19,7 +19,7 @@ class WorkOrderController extends Controller
 {
     public function __construct(protected StockService $stockService)
     {
-        $this->authorizeResource(WorkOrder::class, 'work_order');
+        $this->authorizeResource(WorkOrder::class, 'workOrder');
     }
 
     public function index(Request $request): View
@@ -51,7 +51,9 @@ class WorkOrderController extends Controller
             DB::transaction(function () use ($request) {
                 $items = collect($request->items ?? []);
                 $partsTot = $items->sum(fn ($i) => $i['price'] * $i['quantity']);
-                $warehouse = Warehouse::where('branch_id', auth()->user()->branch_id)->firstOrFail();
+                /** @var \App\Models\User $user */
+                $user = auth()->user();
+                $warehouse = Warehouse::where('branch_id', $user->branch_id)->firstOrFail();
 
                 // Validate stock for product items before creating WO
                 $products = [];
