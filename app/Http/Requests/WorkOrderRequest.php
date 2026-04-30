@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class WorkOrderRequest extends FormRequest
 {
@@ -17,8 +18,8 @@ class WorkOrderRequest extends FormRequest
     {
         return [
             'customer_name' => 'required|string|max:255',
-            'customer_phone' => ['nullable', 'string', 'max:30', Rule::regex('/^[0-9+\s\-()]{9,}$/')],
-            'vehicle_plate' => ['nullable', 'string', 'max:25', Rule::regex('/^[A-Z]{1,3}\s?[0-9]{1,4}\s?[A-Z]{1,3}$/')],
+            'customer_phone' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+\s\-()]{9,}$/'],
+            'vehicle_plate' => ['nullable', 'string', 'max:25', 'regex:/^[A-Z]{1,3}\s?[0-9]{1,4}\s?[A-Z]{1,3}$/'],
             'vehicle_type_id' => 'nullable|exists:vehicle_types,id',
             'vehicle_year' => 'nullable|integer|min:1990|max:'.date('Y'),
             'complaint' => 'nullable|string|max:1000',

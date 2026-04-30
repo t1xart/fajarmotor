@@ -19,18 +19,13 @@ class WorkOrderController extends Controller
 {
     public function __construct(protected StockService $stockService)
     {
-        $this->middleware(function ($request, $next) {
-            if ($request->method() === 'GET') {
-                $this->authorize('viewAny', WorkOrder::class);
-            } elseif ($request->method() === 'POST' && $request->route()->getName() === 'work-orders.store') {
-                $this->authorize('create', WorkOrder::class);
-            }
-            return $next($request);
-        });
+        $this->authorizeResource(WorkOrder::class, 'work_order');
     }
 
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', WorkOrder::class);
+
         $orders = WorkOrder::with(['branch', 'vehicleType.brand'])
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
             ->when($request->search, fn ($q) => $q->where('customer_name', 'like', "%{$request->search}%")->orWhere('vehicle_plate', 'like', "%{$request->search}%"))
@@ -41,6 +36,8 @@ class WorkOrderController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', WorkOrder::class);
+
         $vehicleTypes = VehicleType::with('brand')->where('is_active', true)->get()->groupBy('brand.name');
         $products = Product::where('is_active', true)->get();
 
@@ -49,6 +46,7 @@ class WorkOrderController extends Controller
 
     public function store(WorkOrderRequest $request): RedirectResponse
     {
+        // Handled by authorizeResource and WorkOrderRequest@authorize
         try {
             DB::transaction(function () use ($request) {
                 $items = collect($request->items ?? []);
@@ -117,6 +115,8 @@ class WorkOrderController extends Controller
 
     public function updateStatus(Request $request, WorkOrder $workOrder): RedirectResponse
     {
+        $this->authorize('update', $workOrder);
+
         $request->validate(['status' => 'required|in:'.implode(',', [
             WorkOrder::STATUS_PENDING,
             WorkOrder::STATUS_IN_PROGRESS,
