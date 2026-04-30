@@ -13,6 +13,7 @@ use App\Services\WoNumberService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class WorkOrderController extends Controller
@@ -24,7 +25,7 @@ class WorkOrderController extends Controller
 
     public function index(Request $request): View
     {
-        $this->authorize('viewAny', WorkOrder::class);
+        Gate::authorize('viewAny', WorkOrder::class);
 
         $orders = WorkOrder::with(['branch', 'vehicleType.brand'])
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
@@ -36,7 +37,7 @@ class WorkOrderController extends Controller
 
     public function create(): View
     {
-        $this->authorize('create', WorkOrder::class);
+        Gate::authorize('create', WorkOrder::class);
 
         $vehicleTypes = VehicleType::with('brand')->where('is_active', true)->get()->groupBy('brand.name');
         $products = Product::where('is_active', true)->get();
@@ -51,6 +52,7 @@ class WorkOrderController extends Controller
             DB::transaction(function () use ($request) {
                 $items = collect($request->items ?? []);
                 $partsTot = $items->sum(fn ($i) => $i['price'] * $i['quantity']);
+                
                 /** @var \App\Models\User $user */
                 $user = auth()->user();
                 $warehouse = Warehouse::where('branch_id', $user->branch_id)->firstOrFail();
@@ -68,7 +70,7 @@ class WorkOrderController extends Controller
 
                 $wo = WorkOrder::create([
                     'wo_number' => WoNumberService::generate(),
-                    'branch_id' => auth()->user()->branch_id,
+                    'branch_id' => $user->branch_id,
                     'customer_name' => $request->customer_name,
                     'customer_phone' => $request->customer_phone,
                     'vehicle_plate' => $request->vehicle_plate,
@@ -78,7 +80,7 @@ class WorkOrderController extends Controller
                     'service_fee' => $request->service_fee ?? 0,
                     'parts_total' => $partsTot,
                     'total' => ($request->service_fee ?? 0) + $partsTot,
-                    'user_id' => auth()->id(),
+                    'user_id' => $user->id,
                 ]);
 
                 foreach ($items as $item) {
@@ -117,7 +119,7 @@ class WorkOrderController extends Controller
 
     public function updateStatus(Request $request, WorkOrder $workOrder): RedirectResponse
     {
-        $this->authorize('update', $workOrder);
+        Gate::authorize('update', $workOrder);
 
         $request->validate(['status' => 'required|in:'.implode(',', [
             WorkOrder::STATUS_PENDING,
