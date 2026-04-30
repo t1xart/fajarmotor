@@ -15,7 +15,7 @@ class SaleRequest extends FormRequest
     {
         return [
             'customer_name' => 'nullable|string|max:255',
-            'customer_phone' => 'nullable|string|max:20|regex:/^(?:0|\+62)[0-9]{9,12}$/',
+            'customer_phone' => 'nullable|string|max:30|regex:/^[0-9+\s\-()]{9,}$/',
             'payment_method' => 'required|in:cash,transfer,qris',
             'discount' => 'nullable|numeric|min:0|max:999999999', // nominal, bukan persentase
             'paid_amount' => 'required|numeric|min:0',

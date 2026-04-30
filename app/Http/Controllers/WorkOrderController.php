@@ -17,7 +17,17 @@ use Illuminate\View\View;
 
 class WorkOrderController extends Controller
 {
-    public function __construct(protected StockService $stockService) {}
+    public function __construct(protected StockService $stockService)
+    {
+        $this->middleware(function ($request, $next) {
+            if ($request->method() === 'GET') {
+                $this->authorize('viewAny', WorkOrder::class);
+            } elseif ($request->method() === 'POST' && $request->route()->getName() === 'work-orders.store') {
+                $this->authorize('create', WorkOrder::class);
+            }
+            return $next($request);
+        });
+    }
 
     public function index(Request $request): View
     {
@@ -107,9 +117,15 @@ class WorkOrderController extends Controller
 
     public function updateStatus(Request $request, WorkOrder $workOrder): RedirectResponse
     {
-        $request->validate(['status' => 'required|in:pending,in_progress,done,delivered,cancelled']);
+        $request->validate(['status' => 'required|in:'.implode(',', [
+            WorkOrder::STATUS_PENDING,
+            WorkOrder::STATUS_IN_PROGRESS,
+            WorkOrder::STATUS_DONE,
+            WorkOrder::STATUS_DELIVERED,
+            WorkOrder::STATUS_CANCELLED,
+        ])]);
 
-        if ($workOrder->status === 'cancelled') {
+        if ($workOrder->status === WorkOrder::STATUS_CANCELLED) {
             return back()->withErrors(['error' => 'WO yang sudah dibatalkan tidak bisa diubah lagi.']);
         }
 
@@ -117,7 +133,7 @@ class WorkOrderController extends Controller
             DB::transaction(function () use ($request, $workOrder) {
                 $data = ['status' => $request->status];
 
-                if ($request->status === 'cancelled') {
+                if ($request->status === WorkOrder::STATUS_CANCELLED) {
                     $warehouse = Warehouse::where('branch_id', $workOrder->branch_id)->firstOrFail();
                     foreach ($workOrder->items as $item) {
                         if ($item->product_id) {
@@ -133,10 +149,10 @@ class WorkOrderController extends Controller
                     }
                 }
 
-                if ($request->status === 'in_progress' && ! $workOrder->started_at) {
+                if ($request->status === WorkOrder::STATUS_IN_PROGRESS && ! $workOrder->started_at) {
                     $data['started_at'] = now();
                 }
-                if ($request->status === 'done' && ! $workOrder->finished_at) {
+                if ($request->status === WorkOrder::STATUS_DONE && ! $workOrder->finished_at) {
                     $data['finished_at'] = now();
                 }
 

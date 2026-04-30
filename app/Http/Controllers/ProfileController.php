@@ -48,7 +48,7 @@ class ProfileController extends Controller
         DB::table('email_change_otps')->insert([
             'user_id' => $user->id,
             'new_email' => $request->new_email,
-            'otp' => $otp,
+            'otp_hash' => Hash::make($otp),
             'expires_at' => now()->addMinutes(10),
             'created_at' => now(),
             'updated_at' => now(),
@@ -76,20 +76,14 @@ class ProfileController extends Controller
         $user = auth()->user();
         $record = DB::table('email_change_otps')
             ->where('user_id', $user->id)
-            ->where('otp', $request->otp)
+            ->where('expires_at', '>', now())
             ->first();
 
-        if (! $record) {
+        if (! $record || ! Hash::check($request->otp, $record->otp_hash)) {
             return back()
-                ->withErrors(['otp' => 'Kode OTP tidak valid.'])
+                ->withErrors(['otp' => 'Kode OTP tidak valid atau sudah kedaluwarsa.'])
                 ->with('otp_sent', true)
                 ->with('pending_email', '');
-        }
-
-        if (now()->isAfter($record->expires_at)) {
-            DB::table('email_change_otps')->where('user_id', $user->id)->delete();
-
-            return back()->withErrors(['otp' => 'Kode OTP sudah kedaluwarsa. Silakan minta ulang.']);
         }
 
         $user->update([

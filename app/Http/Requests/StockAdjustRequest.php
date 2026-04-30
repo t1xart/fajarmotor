@@ -20,9 +20,7 @@ class StockAdjustRequest extends FormRequest
             'product_id' => 'required|exists:products,id',
             'warehouse_id' => 'required|exists:warehouses,id',
             // adjustment: set absolute quantity (can be 0+), others: positive delta
-            'quantity' => $type === 'adjustment'
-                ? 'required|integer|min:0|max:999999'
-                : 'required|integer|min:1|max:99999',
+            'quantity' => 'required|integer|min:'.($type === 'adjustment' ? '0' : '1').'|max:9999999',
             'type' => 'required|in:in,out,adjustment,transfer',
             'notes' => 'nullable|string|max:1000',
             'to_warehouse_id' => [

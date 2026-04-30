@@ -147,8 +147,7 @@
                         <div class="row g-1">
                             @foreach($types as $type)
                             <div class="col-md-3 col-6">
-                                <label class="d-flex align-items-center gap-2 p-2 rounded cursor-pointer" style="border:1px solid #e2e8f0;font-size:.78rem;cursor:pointer;transition:.15s"
-                                       onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#e2e8f0'">
+                                <label class="compatibility-label d-flex align-items-center gap-2 p-2 rounded cursor-pointer">
                                     <input type="checkbox" name="compatibility[]" value="{{ $type->id }}"
                                            @checked(in_array($type->id, old('compatibility', $selected ?? [])))>
                                     {{ $type->name }}
@@ -180,19 +179,19 @@
                             <img src="{{ Storage::url($img->image_path) }}" class="img-fluid rounded" style="height:90px;object-fit:cover;width:100%">
                             <form method="POST" action="{{ route('products.images.destroy', $img) }}" class="position-absolute top-0 end-0 m-1">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-icon" style="background:rgba(239,68,68,.9);border:none;color:#fff;width:22px;height:22px;font-size:.6rem"><i class="fa fa-times"></i></button>
+                                <button type="submit" class="btn btn-sm btn-icon btn-delete-img" style="background:rgba(239,68,68,.9);border:none;color:#fff;width:22px;height:22px;font-size:.6rem"><i class="fa fa-times"></i></button>
                             </form>
                         </div>
                         @endforeach
                     </div>
                     @endif
                     @endisset
-                    <div class="border-2 border-dashed rounded p-3 text-center" style="border:2px dashed #e2e8f0;cursor:pointer" onclick="document.getElementById('imgInput').click()">
+                    <div id="dropZone" class="upload-zone border-2 border-dashed rounded p-3 text-center">
                         <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2 d-block opacity-50"></i>
                         <div style="font-size:.78rem;color:#64748b">Klik untuk upload foto</div>
                         <div style="font-size:.7rem;color:#94a3b8">JPG, PNG — maks 2MB</div>
                     </div>
-                    <input type="file" id="imgInput" name="images[]" class="d-none" multiple accept="image/*" onchange="previewImages(this)">
+                    <input type="file" id="imgInput" name="images[]" class="d-none" multiple accept="image/*">
                     <div id="imgPreview" class="row g-2 mt-2"></div>
                 </div>
             </div>
@@ -210,21 +209,52 @@
     </div>
 </form>
 @endsection
+@push('styles')
+<style>
+.compatibility-label { border: 1px solid #e2e8f0; font-size: .78rem; transition: .15s; }
+.compatibility-label:hover { border-color: #6366f1; }
+.upload-zone { border: 2px dashed #e2e8f0; cursor: pointer; transition: all .2s; }
+.upload-zone:hover { border-color: #6366f1; background: rgba(99,102,241,.04); }
+.btn-delete-img:hover { background: #ef4444 !important; transform: scale(1.1); }
+</style>
+@endpush
+
 @push('scripts')
 <script>
-function previewImages(input) {
-    const preview = document.getElementById('imgPreview');
-    preview.innerHTML = '';
-    [...input.files].forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const col = document.createElement('div');
-            col.className = 'col-6';
-            col.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" style="height:80px;object-fit:cover;width:100%">`;
-            preview.appendChild(col);
-        };
-        reader.readAsDataURL(file);
+document.addEventListener('DOMContentLoaded', function() {
+    const imgInput = document.getElementById('imgInput');
+    const dropZone = document.getElementById('dropZone');
+    const preview  = document.getElementById('imgPreview');
+
+    if (dropZone) {
+        dropZone.addEventListener('click', () => imgInput?.click());
+    }
+
+    if (imgInput) {
+        imgInput.addEventListener('change', function() {
+            if (!preview) return;
+            preview.innerHTML = '';
+            [...this.files].forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const col = document.createElement('div');
+                    col.className = 'col-6';
+                    col.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" style="height:80px;object-fit:cover;width:100%">`;
+                    preview.appendChild(col);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    }
+
+    // Confirmation for image deletion
+    document.querySelectorAll('.btn-delete-img').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('Hapus foto ini?')) {
+                e.preventDefault();
+            }
+        });
     });
-}
+});
 </script>
 @endpush

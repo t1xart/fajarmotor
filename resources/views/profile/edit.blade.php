@@ -197,7 +197,7 @@
 <div class="profile-hero animate-in">
     <div class="hero-inner">
         <div class="avatar-wrap">
-            <div class="avatar-circle" onclick="document.getElementById('avatarInput').click()" title="Ganti foto">
+            <div class="avatar-circle" id="avatarCircle" title="Ganti foto">
                 @if(auth()->user()?->avatar)
                     <img id="avatarPreview" src="{{ Storage::url(auth()->user()->avatar) }}" alt="avatar">
                 @else
@@ -217,9 +217,9 @@
 
 {{-- TABS --}}
 <div class="tabs-bar animate-in">
-    <button class="tab-btn active" onclick="switchTab('photo',this)"><i class="fa fa-camera"></i>Foto Profil</button>
-    <button class="tab-btn" onclick="switchTab('info',this)"><i class="fa fa-user"></i>Informasi</button>
-    <button class="tab-btn" onclick="switchTab('security',this)"><i class="fa fa-shield-halved"></i>Keamanan</button>
+    <button class="tab-btn active" data-tab="photo"><i class="fa fa-camera"></i>Foto Profil</button>
+    <button class="tab-btn" data-tab="info"><i class="fa fa-user"></i>Informasi</button>
+    <button class="tab-btn" data-tab="security"><i class="fa fa-shield-halved"></i>Keamanan</button>
 </div>
 
 {{-- TAB: PHOTO --}}
@@ -232,7 +232,7 @@
         <div class="card-body">
             <form method="POST" action="{{ route('profile.photo.update') }}" enctype="multipart/form-data" id="photoForm">
                 @csrf
-                <div class="drop-zone" id="dropZone" onclick="document.getElementById('avatarInput').click()">
+                <div class="drop-zone" id="dropZone">
                     <i class="fa fa-cloud-arrow-up"></i>
                     <div style="font-size:13px;font-weight:600;margin-bottom:4px">Drag & drop atau klik untuk pilih foto</div>
                     <div style="font-size:11px;color:var(--text3)"><i class="fa fa-circle-info" style="margin-right:4px"></i>Format: JPG, PNG &nbsp;|&nbsp; Maks: 2MB</div>
@@ -241,15 +241,15 @@
                 <div class="file-info" id="fileInfo">
                     <i class="fa fa-file-image" style="color:var(--primary)"></i>
                     <span id="fileName"></span><span id="fileSize" style="color:var(--text3)"></span>
-                    <button type="button" onclick="clearFile()" style="margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer"><i class="fa fa-times"></i></button>
+                    <button type="button" id="clearFileBtn" style="margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer"><i class="fa fa-times"></i></button>
                 </div>
                 <div class="file-err" id="fileErr"><i class="fa fa-circle-exclamation me-2"></i><span id="fileErrMsg"></span></div>
                 <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
                     <button type="submit" class="btn-p" id="savePhotoBtn" disabled><i class="fa fa-floppy-disk"></i>Simpan Foto</button>
                     @if(auth()->user()?->avatar)
-                    <button type="button" class="btn-d" onclick="if(confirm('Hapus foto profil?'))document.getElementById('deleteForm').submit()"><i class="fa fa-trash"></i>Hapus Foto</button>
+                    <button type="button" class="btn-d" id="deletePhotoBtn"><i class="fa fa-trash"></i>Hapus Foto</button>
                     @endif
-                    <button type="button" class="btn-s" onclick="document.getElementById('avatarInput').click()"><i class="fa fa-upload"></i>Pilih File</button>
+                    <button type="button" class="btn-s" id="selectFileBtn"><i class="fa fa-upload"></i>Pilih File</button>
                 </div>
             </form>
             <form method="POST" action="{{ route('profile.photo.delete') }}" id="deleteForm" style="display:none">@csrf @method('DELETE')</form>
@@ -335,7 +335,7 @@
                     <div class="sec-title">Password</div>
                     <div class="sec-desc">Terakhir diubah: tidak diketahui</div>
                 </div>
-                <button class="btn-s" style="padding:6px 14px;font-size:12px" onclick="showPwForm()"><i class="fa fa-pen"></i>Ubah</button>
+                <button class="btn-s" id="showPwFormBtn" style="padding:6px 14px;font-size:12px"><i class="fa fa-pen"></i>Ubah</button>
             </div>
             <div class="sec-item">
                 <div class="sec-ico" style="background:rgba(245,158,11,.12);color:var(--warning)"><i class="fa fa-clock-rotate-left"></i></div>
@@ -364,7 +364,7 @@
                 <div class="form-row">
                     <div class="fg">
                         <label class="fl">Password Baru</label>
-                        <div class="fi-icon-wrap"><i class="fa fa-lock"></i><input type="password" name="password" id="newPw" class="fi" placeholder="Min. 8 karakter" required oninput="checkStr(this.value)"></div>
+                        <div class="fi-icon-wrap"><i class="fa fa-lock"></i><input type="password" name="password" id="newPw" class="fi" placeholder="Min. 8 karakter" required></div>
                         <div class="pw-str" id="pwStr"><div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div><div class="pw-txt" id="pwTxt"></div></div>
                     </div>
                     <div class="fg">
@@ -374,7 +374,7 @@
                 </div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap">
                     <button type="submit" class="btn-p" id="savePwBtn"><i class="fa fa-check"></i>Simpan Password</button>
-                    <button type="button" class="btn-s" onclick="hidePwForm()"><i class="fa fa-times"></i>Batal</button>
+                    <button type="button" class="btn-s" id="hidePwFormBtn"><i class="fa fa-times"></i>Batal</button>
                 </div>
             </form>
         </div>
@@ -410,197 +410,230 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const toast = document.getElementById('toast');
+    const pageData = document.getElementById('page-data');
 
-// ── TABS ──
-function switchTab(id, btn) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active');
-    btn.classList.add('active');
-}
+    // ── TOAST ──
+    const showToast = (msg, type = 'ok') => {
+        if (!toast) return;
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fa fa-${type === 'ok' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3500);
+    };
 
-// Auto-switch to info tab using data bridge
-const _pd = document.getElementById('page-data');
-if (_pd && _pd.dataset.switchInfo === '1') {
-    const infoBtn = document.querySelector('[data-tab-info="1"]');
-    if (infoBtn) switchTab('info', infoBtn);
-}
+    // Toast from session via data bridge
+    if (pageData) {
+        if (pageData.dataset.success) showToast(pageData.dataset.success, 'ok');
+        else if (pageData.dataset.error) showToast(pageData.dataset.error, 'err');
+    }
 
-// Loading states for OTP forms
-const emailReqForm = document.getElementById('emailReqForm');
-if (emailReqForm) {
-    emailReqForm.addEventListener('submit', function() {
-        const btn = document.getElementById('sendOtpBtn');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Mengirim...'; }
+    // ── TABS ──
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    function switchTab(tabId) {
+        tabPanels.forEach(p => p.classList.remove('active'));
+        tabBtns.forEach(b => b.classList.remove('active'));
+        
+        const targetPanel = document.getElementById('tab-' + tabId);
+        const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+        
+        if (targetPanel) targetPanel.classList.add('active');
+        if (targetBtn) targetBtn.classList.add('active');
+    }
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            switchTab(this.dataset.tab);
+        });
     });
-}
 
-const otpForm = document.getElementById('otpForm');
-if (otpForm) {
-    otpForm.addEventListener('submit', function() {
-        const btn = document.getElementById('verifyOtpBtn');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Memverifikasi...'; }
+    if (pageData && pageData.dataset.switchInfo === '1') {
+        switchTab('info');
+    }
+
+    // ── PHOTO MANAGEMENT ──
+    const avatarInput = document.getElementById('avatarInput');
+    const dropZone    = document.getElementById('dropZone');
+    const avatarCircle = document.getElementById('avatarCircle');
+    const selectFileBtn = document.getElementById('selectFileBtn');
+    const clearFileBtn  = document.getElementById('clearFileBtn');
+    const deletePhotoBtn = document.getElementById('deletePhotoBtn');
+    const photoForm     = document.getElementById('photoForm');
+    const savePhotoBtn  = document.getElementById('savePhotoBtn');
+    const fileInfo      = document.getElementById('fileInfo');
+    const fileErr       = document.getElementById('fileErr');
+    const fileErrMsg    = document.getElementById('fileErrMsg');
+
+    const triggerSelect = () => avatarInput?.click();
+
+    [avatarCircle, dropZone, selectFileBtn].forEach(el => {
+        el?.addEventListener('click', triggerSelect);
     });
-}
 
-// ── CROP ──
-let cropper = null;
-const MAX = 2 * 1024 * 1024;
-const avatarInput = document.getElementById('avatarInput');
-const dropZone    = document.getElementById('dropZone');
-const fileInfo    = document.getElementById('fileInfo');
-const fileErr     = document.getElementById('fileErr');
-const saveBtn     = document.getElementById('savePhotoBtn');
-const cropModal   = document.getElementById('cropModal');
-const cropCancelBtn = document.getElementById('cropCancelBtn');
-const cropApplyBtn = document.getElementById('cropApplyBtn');
+    if (dropZone) {
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+    }
 
-if (avatarInput) {
-    avatarInput.addEventListener('change', function(e) { handleFile(e.target.files[0]); });
-}
+    if (avatarInput) {
+        avatarInput.addEventListener('change', e => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+    }
 
-if (dropZone) {
-    dropZone.addEventListener('dragover', function(e) { 
-        e.preventDefault(); 
-        dropZone.classList.add('drag-over'); 
-    });
-    dropZone.addEventListener('dragleave', function() { 
-        dropZone.classList.remove('drag-over'); 
-    });
-    dropZone.addEventListener('drop', function(e) { 
-        e.preventDefault(); 
-        dropZone.classList.remove('drag-over'); 
-        handleFile(e.dataTransfer.files[0]); 
-    });
-}
+    if (clearFileBtn) {
+        clearFileBtn.addEventListener('click', () => {
+            if (avatarInput) avatarInput.value = '';
+            if (fileInfo) fileInfo.style.display = 'none';
+            if (savePhotoBtn) savePhotoBtn.disabled = true;
+        });
+    }
 
-if (cropCancelBtn) {
-    cropCancelBtn.addEventListener('click', closeCrop);
-}
+    if (deletePhotoBtn) {
+        deletePhotoBtn.addEventListener('click', () => {
+            if (confirm('Hapus foto profil?')) {
+                document.getElementById('deleteForm')?.submit();
+            }
+        });
+    }
 
-if (cropApplyBtn) {
-    cropApplyBtn.addEventListener('click', applyCrop);
-}
+    if (photoForm) {
+        photoForm.addEventListener('submit', () => {
+            if (savePhotoBtn) {
+                savePhotoBtn.disabled = true;
+                savePhotoBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+            }
+        });
+    }
 
-function handleFile(file) {
-    if (fileErr) fileErr.style.display = 'none';
-    if (!file) return;
-    if (!['image/jpeg','image/png'].includes(file.type)) { showErr('Format harus JPG atau PNG.'); return; }
-    if (file.size > MAX) { showErr('Ukuran file melebihi 2MB.'); return; }
-    const reader = new FileReader();
-    reader.onload = e => openCrop(e.target.result);
-    reader.readAsDataURL(file);
-}
-
-function openCrop(src) {
+    // ── CROP LOGIC ──
+    let cropper = null;
+    const MAX_SIZE = 2 * 1024 * 1024;
+    const cropModal = document.getElementById('cropModal');
     const cropImg = document.getElementById('cropImg');
-    if (cropImg) cropImg.src = src;
-    if (cropModal) cropModal.classList.add('open');
-    setTimeout(() => {
-        if (cropper) cropper.destroy();
-        const img = document.getElementById('cropImg');
-        if (img) {
-            cropper = new Cropper(img, { aspectRatio: 1, viewMode: 1, autoCropArea: 1 });
+
+    function handleFile(file) {
+        if (fileErr) fileErr.style.display = 'none';
+        if (!file) return;
+        if (!['image/jpeg', 'image/png'].includes(file.type)) {
+            if (fileErrMsg) fileErrMsg.textContent = 'Format harus JPG atau PNG.';
+            if (fileErr) fileErr.style.display = 'block';
+            if (avatarInput) avatarInput.value = '';
+            return;
         }
-    }, 100);
-}
+        if (file.size > MAX_SIZE) {
+            if (fileErrMsg) fileErrMsg.textContent = 'Ukuran file melebihi 2MB.';
+            if (fileErr) fileErr.style.display = 'block';
+            if (avatarInput) avatarInput.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+            if (cropImg) cropImg.src = e.target.result;
+            cropModal?.classList.add('open');
+            setTimeout(() => {
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(cropImg, { aspectRatio: 1, viewMode: 1, autoCropArea: 1 });
+            }, 100);
+        };
+        reader.readAsDataURL(file);
+    }
 
-function closeCrop() {
-    if (cropModal) cropModal.classList.remove('open');
-    if (cropper) { cropper.destroy(); cropper = null; }
-    if (avatarInput) avatarInput.value = '';
-}
-
-function applyCrop() {
-    if (!cropper) return;
-    cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob(blob => {
-        const url = URL.createObjectURL(blob);
-        const prev = document.getElementById('avatarPreview');
-        const ini  = document.getElementById('avatarInitials');
-        if (prev) { prev.src = url; prev.style.display = 'block'; }
-        if (ini) ini.style.display = 'none';
-        const dt = new DataTransfer();
-        dt.items.add(new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
-        if (avatarInput) avatarInput.files = dt.files;
-        const mb = (blob.size / 1024 / 1024).toFixed(2);
-        const fileName = document.getElementById('fileName');
-        const fileSize = document.getElementById('fileSize');
-        if (fileName) fileName.textContent = 'avatar.jpg';
-        if (fileSize) fileSize.textContent = ` (${mb} MB)`;
-        if (fileInfo) fileInfo.style.display = 'flex';
-        if (saveBtn) saveBtn.disabled = false;
-        closeCrop();
-    }, 'image/jpeg', 0.92);
-}
-
-function clearFile() {
-    if (avatarInput) avatarInput.value = ''; 
-    if (fileInfo) fileInfo.style.display = 'none'; 
-    if (saveBtn) saveBtn.disabled = true;
-    // Reset avatar preview logic here based on backend data
-}
-
-function showErr(msg) { 
-    const fileErrMsg = document.getElementById('fileErrMsg');
-    if (fileErrMsg) fileErrMsg.textContent = msg; 
-    if (fileErr) fileErr.style.display = 'block'; 
-    if (avatarInput) avatarInput.value = ''; 
-}
-
-const photoForm = document.getElementById('photoForm');
-if (photoForm) {
-    photoForm.addEventListener('submit', function() {
-        if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...'; }
+    document.getElementById('cropCancelBtn')?.addEventListener('click', () => {
+        cropModal?.classList.remove('open');
+        if (cropper) { cropper.destroy(); cropper = null; }
+        if (avatarInput) avatarInput.value = '';
     });
-}
 
-// ── PASSWORD FORM ──
-window.showPwForm = function() { 
-    const pwForm = document.getElementById('pwForm');
-    if (pwForm) { pwForm.style.display = 'block'; pwForm.scrollIntoView({ behavior: 'smooth', block: 'start' }); } 
-};
+    document.getElementById('cropApplyBtn')?.addEventListener('click', () => {
+        if (!cropper) return;
+        cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const prev = document.getElementById('avatarPreview');
+            const ini  = document.getElementById('avatarInitials');
+            if (prev) { prev.src = url; prev.style.display = 'block'; }
+            if (ini) ini.style.display = 'none';
 
-window.hidePwForm = function() { 
-    const pwForm = document.getElementById('pwForm');
-    if (pwForm) pwForm.style.display = 'none'; 
-};
+            const dt = new DataTransfer();
+            dt.items.add(new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
+            if (avatarInput) avatarInput.files = dt.files;
 
-window.checkStr = function(val) {
-    const el = document.getElementById('pwStr'), fill = document.getElementById('pwFill'), txt = document.getElementById('pwTxt');
-    if (!el) return;
-    if (!val) { el.style.display = 'none'; return; }
-    el.style.display = 'block';
-    let s = 0;
-    if (val.length >= 8) s++; if (/[A-Z]/.test(val)) s++; if (/[0-9]/.test(val)) s++; if (/[^A-Za-z0-9]/.test(val)) s++;
-    const lvl = [{w:'25%',bg:'#ef4444',t:'Lemah'},{w:'50%',bg:'#f59e0b',t:'Cukup'},{w:'75%',bg:'#3b82f6',t:'Kuat'},{w:'100%',bg:'#10b981',t:'Sangat Kuat'}][Math.max(0,s-1)];
-    if (fill) { fill.style.width = lvl.w; fill.style.background = lvl.bg; }
-    if (txt) { txt.textContent = 'Kekuatan: ' + lvl.t; txt.style.color = lvl.bg; }
-};
+            const mb = (blob.size / 1024 / 1024).toFixed(2);
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            if (fileName) fileName.textContent = 'avatar.jpg';
+            if (fileSize) fileSize.textContent = ` (${mb} MB)`;
+            if (fileInfo) fileInfo.style.display = 'flex';
+            if (savePhotoBtn) savePhotoBtn.disabled = false;
 
-const pwChangeForm = document.getElementById('pwChangeForm');
-if (pwChangeForm) {
-    pwChangeForm.addEventListener('submit', function() {
-        const btn = document.getElementById('savePwBtn');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...'; }
+            cropModal?.classList.remove('open');
+            cropper.destroy();
+            cropper = null;
+        }, 'image/jpeg', 0.92);
     });
-}
 
-// ── TOAST ──
-window.showToast = function(msg, type = 'ok') {
-    const t = document.getElementById('toast');
-    if (!t) return;
-    t.className = `toast ${type}`;
-    t.innerHTML = `<i class="fa fa-${type==='ok'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3500);
-};
+    // ── PASSWORD MANAGEMENT ──
+    const showPwBtn = document.getElementById('showPwFormBtn');
+    const hidePwBtn = document.getElementById('hidePwFormBtn');
+    const pwForm    = document.getElementById('pwForm');
+    const newPwInput = document.getElementById('newPw');
+    const pwChangeForm = document.getElementById('pwChangeForm');
+    const savePwBtn = document.getElementById('savePwBtn');
 
-// Toast from session via data bridge
-if (_pd) {
-    if (_pd.dataset.success) showToast(_pd.dataset.success, 'ok');
-    else if (_pd.dataset.error) showToast(_pd.dataset.error, 'err');
-}
+    showPwBtn?.addEventListener('click', () => {
+        if (pwForm) {
+            pwForm.style.display = 'block';
+            pwForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
 
-}); // DOMContentLoaded
+    hidePwBtn?.addEventListener('click', () => {
+        if (pwForm) pwForm.style.display = 'none';
+    });
+
+    newPwInput?.addEventListener('input', function() {
+        const val = this.value;
+        const strEl = document.getElementById('pwStr');
+        const fill = document.getElementById('pwFill');
+        const txt = document.getElementById('pwTxt');
+
+        if (!strEl) return;
+        if (!val) { strEl.style.display = 'none'; return; }
+        
+        strEl.style.display = 'block';
+        let s = 0;
+        if (val.length >= 8) s++;
+        if (/[A-Z]/.test(val)) s++;
+        if (/[0-9]/.test(val)) s++;
+        if (/[^A-Za-z0-9]/.test(val)) s++;
+        
+        const levels = [
+            {w:'25%',bg:'#ef4444',t:'Lemah'},
+            {w:'50%',bg:'#f59e0b',t:'Cukup'},
+            {w:'75%',bg:'#3b82f6',t:'Kuat'},
+            {w:'100%',bg:'#10b981',t:'Sangat Kuat'}
+        ];
+        const lvl = levels[Math.max(0, s - 1)];
+        
+        if (fill) { fill.style.width = lvl.w; fill.style.background = lvl.bg; }
+        if (txt) { txt.textContent = 'Kekuatan: ' + lvl.t; txt.style.color = lvl.bg; }
+    });
+
+    if (pwChangeForm) {
+        pwChangeForm.addEventListener('submit', () => {
+            if (savePwBtn) {
+                savePwBtn.disabled = true;
+                savePwBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+            }
+        });
+    }
+});
 </script>
 @endpush

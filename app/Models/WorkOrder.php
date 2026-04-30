@@ -11,6 +11,12 @@ class WorkOrder extends Model
 {
     use LogsActivity, SoftDeletes;
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_DONE = 'done';
+    public const STATUS_DELIVERED = 'delivered';
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = ['wo_number', 'branch_id', 'customer_name', 'customer_phone', 'vehicle_plate', 'vehicle_type_id', 'vehicle_year', 'complaint', 'diagnosis', 'service_fee', 'parts_total', 'total', 'status', 'user_id', 'started_at', 'finished_at'];
 
     protected $casts = ['service_fee' => 'decimal:2', 'parts_total' => 'decimal:2', 'total' => 'decimal:2', 'started_at' => 'datetime', 'finished_at' => 'datetime'];

@@ -61,7 +61,7 @@ class SaleController extends Controller
                 'total' => $total,
                 'paid_amount' => $request->paid_amount,
                 'change_amount' => $request->paid_amount - $total,
-                'status' => 'paid',
+                'status' => $request->paid_amount >= $total ? 'paid' : 'partial',
                 'notes' => $request->notes,
                 'user_id' => auth()->id(),
             ]);

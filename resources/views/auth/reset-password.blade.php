@@ -90,9 +90,9 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#f8
                 <div class="input-wrap">
                     <i class="fa fa-lock input-icon"></i>
                     <input type="password" id="password" name="password" placeholder="Min. 8 karakter"
-                        required autocomplete="new-password" oninput="checkStrength(this.value)"
+                        required autocomplete="new-password"
                         class="{{ $errors->has('password') ? 'is-invalid' : '' }}">
-                    <button type="button" class="toggle-pw" onclick="togglePw('password','ic1')">
+                    <button type="button" class="toggle-pw" data-target="password" data-icon="ic1">
                         <i class="fa fa-eye" id="ic1"></i>
                     </button>
                 </div>
@@ -108,7 +108,7 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#f8
                     <i class="fa fa-lock input-icon"></i>
                     <input type="password" id="password_confirmation" name="password_confirmation"
                         placeholder="Ulangi password baru" required autocomplete="new-password">
-                    <button type="button" class="toggle-pw" onclick="togglePw('password_confirmation','ic2')">
+                    <button type="button" class="toggle-pw" data-target="password_confirmation" data-icon="ic2">
                         <i class="fa fa-eye" id="ic2"></i>
                     </button>
                 </div>
@@ -125,36 +125,64 @@ body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;background:#f8
     </div>
 </div>
 <script>
-function togglePw(id, iconId) {
-    const el = document.getElementById(id);
-    const ic = document.getElementById(iconId);
-    el.type = el.type === 'password' ? 'text' : 'password';
-    ic.className = el.type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
-}
-function checkStrength(val) {
-    const el = document.getElementById('pwStr');
-    const fill = document.getElementById('pwFill');
-    const text = document.getElementById('pwText');
-    if (!val) { el.style.display = 'none'; return; }
-    el.style.display = 'block';
-    let s = 0;
-    if (val.length >= 8) s++;
-    if (/[A-Z]/.test(val)) s++;
-    if (/[0-9]/.test(val)) s++;
-    if (/[^A-Za-z0-9]/.test(val)) s++;
-    const lvl = [
-        {w:'25%',bg:'#ef4444',t:'Lemah'},
-        {w:'50%',bg:'#f59e0b',t:'Cukup'},
-        {w:'75%',bg:'#3b82f6',t:'Kuat'},
-        {w:'100%',bg:'#10b981',t:'Sangat Kuat'},
-    ][Math.max(0, s - 1)];
-    fill.style.width = lvl.w; fill.style.background = lvl.bg;
-    text.textContent = 'Kekuatan: ' + lvl.t; text.style.color = lvl.bg;
-}
-document.getElementById('form').addEventListener('submit', function() {
-    const btn = document.getElementById('btn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('form');
+    const submitBtn = document.getElementById('btn');
+    const pwInput = document.getElementById('password');
+
+    // Toggle Password
+    document.querySelectorAll('.toggle-pw').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            const iconId = this.dataset.icon;
+            const input = document.getElementById(targetId);
+            const icon = document.getElementById(iconId);
+            
+            if (input && icon) {
+                const isPw = input.type === 'password';
+                input.type = isPw ? 'text' : 'password';
+                icon.className = isPw ? 'fa fa-eye-slash' : 'fa fa-eye';
+            }
+        });
+    });
+
+    // Check Strength
+    pwInput?.addEventListener('input', function() {
+        const val = this.value;
+        const el = document.getElementById('pwStr');
+        const fill = document.getElementById('pwFill');
+        const text = document.getElementById('pwText');
+
+        if (!el || !fill || !text) return;
+        if (!val) { el.style.display = 'none'; return; }
+        
+        el.style.display = 'block';
+        let s = 0;
+        if (val.length >= 8) s++;
+        if (/[A-Z]/.test(val)) s++;
+        if (/[0-9]/.test(val)) s++;
+        if (/[^A-Za-z0-9]/.test(val)) s++;
+        
+        const lvl = [
+            {w:'25%',bg:'#ef4444',t:'Lemah'},
+            {w:'50%',bg:'#f59e0b',t:'Cukup'},
+            {w:'75%',bg:'#3b82f6',t:'Kuat'},
+            {w:'100%',bg:'#10b981',t:'Sangat Kuat'},
+        ][Math.max(0, s - 1)];
+        
+        fill.style.width = lvl.w;
+        fill.style.background = lvl.bg;
+        text.textContent = 'Kekuatan: ' + lvl.t;
+        text.style.color = lvl.bg;
+    });
+
+    // Form Submit
+    form?.addEventListener('submit', function() {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
+        }
+    });
 });
 </script>
 </body>

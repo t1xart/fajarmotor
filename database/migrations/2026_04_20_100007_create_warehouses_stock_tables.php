@@ -36,7 +36,8 @@ return new class extends Migration
             $table->integer('quantity');
             $table->integer('quantity_before');
             $table->integer('quantity_after');
-            $table->nullableMorphs('reference');
+            $table->string('reference_type')->nullable();
+            $table->unsignedBigInteger('reference_id')->nullable();
             $table->text('notes')->nullable();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();

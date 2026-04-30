@@ -55,24 +55,18 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
                     <div>
                         <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Nama Lengkap <span style="color:var(--danger)">*</span></label>
-                        <div style="position:relative">
-                            <i class="fa fa-user" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.8rem;pointer-events:none"></i>
-                            <input type="text" name="name" value="{{ old('name') }}"
-                                style="width:100%;padding:9px 14px 9px 2.5rem;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;transition:all .2s"
-                                placeholder="Nama lengkap pengguna" required
-                                onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,.1)'"
-                                onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div class="fi-wrap">
+                            <i class="fa fa-user fi-ico"></i>
+                            <input type="text" name="name" value="{{ old('name') }}" class="fi-reg"
+                                placeholder="Nama lengkap pengguna" required>
                         </div>
                     </div>
                     <div>
                         <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Alamat Email <span style="color:var(--danger)">*</span></label>
-                        <div style="position:relative">
-                            <i class="fa fa-envelope" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.8rem;pointer-events:none"></i>
-                            <input type="email" name="email" value="{{ old('email') }}"
-                                style="width:100%;padding:9px 14px 9px 2.5rem;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;transition:all .2s"
-                                placeholder="email@domain.com" required
-                                onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,.1)'"
-                                onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div class="fi-wrap">
+                            <i class="fa fa-envelope fi-ico"></i>
+                            <input type="email" name="email" value="{{ old('email') }}" class="fi-reg"
+                                placeholder="email@domain.com" required>
                         </div>
                     </div>
                 </div>
@@ -81,14 +75,11 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
                     <div>
                         <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Password <span style="color:var(--danger)">*</span></label>
-                        <div style="position:relative">
-                            <i class="fa fa-lock" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.8rem;pointer-events:none"></i>
-                            <input type="password" id="pw" name="password"
-                                style="width:100%;padding:9px 2.5rem 9px 2.5rem;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;transition:all .2s"
-                                placeholder="Min. 8 karakter" required oninput="checkStr(this.value)"
-                                onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,.1)'"
-                                onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
-                            <button type="button" onclick="togglePw('pw','pwi')" style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem">
+                        <div class="fi-wrap">
+                            <i class="fa fa-lock fi-ico"></i>
+                            <input type="password" id="pw" name="password" class="fi-reg"
+                                placeholder="Min. 8 karakter" required style="padding-right: 2.5rem;">
+                            <button type="button" class="tpw-btn" data-target="pw" data-icon="pwi">
                                 <i class="fa fa-eye" id="pwi"></i>
                             </button>
                         </div>
@@ -99,14 +90,11 @@
                     </div>
                     <div>
                         <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Konfirmasi Password <span style="color:var(--danger)">*</span></label>
-                        <div style="position:relative">
-                            <i class="fa fa-lock" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.8rem;pointer-events:none"></i>
-                            <input type="password" id="pw2" name="password_confirmation"
-                                style="width:100%;padding:9px 2.5rem 9px 2.5rem;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;transition:all .2s"
-                                placeholder="Ulangi password" required
-                                onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,.1)'"
-                                onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
-                            <button type="button" onclick="togglePw('pw2','pw2i')" style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem">
+                        <div class="fi-wrap">
+                            <i class="fa fa-lock fi-ico"></i>
+                            <input type="password" id="pw2" name="password_confirmation" class="fi-reg"
+                                placeholder="Ulangi password" required style="padding-right: 2.5rem;">
+                            <button type="button" class="tpw-btn" data-target="pw2" data-icon="pw2i">
                                 <i class="fa fa-eye" id="pw2i"></i>
                             </button>
                         </div>
@@ -126,8 +114,7 @@
                             'warehouse' => ['ico'=>'fa-warehouse','color'=>'rgba(245,158,11,.15)','text'=>'var(--warning)','desc'=>'Stok, produk, purchase order'],
                         ][$role->name] ?? ['ico'=>'fa-user','color'=>'rgba(99,102,241,.15)','text'=>'var(--primary)','desc'=>'Akses standar'];
                         @endphp
-                        <div class="role-card {{ old('role') === $role->name ? 'selected' : '' }}"
-                            onclick="selectRole('{{ $role->name }}', this)">
+                        <div class="role-card {{ old('role') === $role->name ? 'selected' : '' }}" data-role="{{ $role->name }}">
                             <div class="role-ico" style="background:{{ $meta['color'] }};color:{{ $meta['text'] }}">
                                 <i class="fa {{ $meta['ico'] }}"></i>
                             </div>
@@ -142,12 +129,9 @@
                 @if($branches->count())
                 <div style="margin-bottom:20px">
                     <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Cabang</label>
-                    <div style="position:relative">
-                        <i class="fa fa-building" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.8rem;pointer-events:none"></i>
-                        <select name="branch_id"
-                            style="width:100%;padding:9px 14px 9px 2.5rem;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;appearance:none;transition:all .2s"
-                            onfocus="this.style.borderColor='var(--primary)'"
-                            onblur="this.style.borderColor='var(--border)'">
+                    <div class="fi-wrap">
+                        <i class="fa fa-building fi-ico"></i>
+                        <select name="branch_id" class="fi-sel">
                             <option value="">— Pilih Cabang —</option>
                             @foreach($branches as $branch)
                             <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
@@ -160,14 +144,10 @@
                 @endif
 
                 <div style="display:flex;gap:10px;padding-top:4px">
-                    <button type="submit" id="submitBtn"
-                        style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:none;border-radius:9px;padding:10px 24px;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px"
-                        onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(99,102,241,.4)'"
-                        onmouseout="this.style.transform='';this.style.boxShadow=''">
+                    <button type="submit" id="submitBtn" class="btn-reg-sub">
                         <i class="fa fa-user-plus"></i>Buat Akun
                     </button>
-                    <a href="{{ route('admin.users') }}"
-                        style="background:transparent;color:var(--text2);border:1.5px solid var(--border);border-radius:9px;padding:10px 20px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px;text-decoration:none">
+                    <a href="{{ route('admin.users') }}" class="btn-reg-can">
                         <i class="fa fa-times"></i>Batal
                     </a>
                 </div>
@@ -177,35 +157,97 @@
 </div>
 @endsection
 
+@push('styles')
+<style>
+.fi-wrap { position:relative; }
+.fi-ico { position:absolute; left:.9rem; top:50%; transform:translateY(-50%); color:var(--text3); font-size:.8rem; pointer-events:none; }
+.fi-reg { width:100%; padding:9px 14px 9px 2.5rem; border:1.5px solid var(--border); border-radius:9px; font-size:13px; font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); outline:none; transition:all .2s; }
+.fi-reg:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,.1); background:var(--surface); }
+.fi-sel { width:100%; padding:9px 14px 9px 2.5rem; border:1.5px solid var(--border); border-radius:9px; font-size:13px; font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); outline:none; appearance:none; transition:all .2s; }
+.fi-sel:focus { border-color:var(--primary); background:var(--surface); }
+.tpw-btn { position:absolute; right:.9rem; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text3); cursor:pointer; font-size:.8rem; }
+.btn-reg-sub { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; border:none; border-radius:9px; padding:10px 24px; font-size:13px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:7px; }
+.btn-reg-sub:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(99,102,241,.4); }
+.btn-reg-can { background:transparent; color:var(--text2); border:1.5px solid var(--border); border-radius:9px; padding:10px 20px; font-size:13px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:7px; text-decoration:none; }
+.btn-reg-can:hover { border-color:var(--primary); color:var(--primary); }
+</style>
+@endpush
+
 @push('scripts')
 <script>
-function selectRole(name, el) {
-    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    document.getElementById('roleInput').value = name;
-}
-function togglePw(id, iconId) {
-    const el = document.getElementById(id), ic = document.getElementById(iconId);
-    el.type = el.type === 'password' ? 'text' : 'password';
-    ic.className = el.type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
-}
-function checkStr(val) {
-    const el=document.getElementById('pwStr'),fill=document.getElementById('pwFill'),txt=document.getElementById('pwTxt');
-    if(!val){el.style.display='none';return}
-    el.style.display='block';
-    let s=0;
-    if(val.length>=8)s++;if(/[A-Z]/.test(val))s++;if(/[0-9]/.test(val))s++;if(/[^A-Za-z0-9]/.test(val))s++;
-    const lvl=[{w:'25%',bg:'#ef4444',t:'Lemah'},{w:'50%',bg:'#f59e0b',t:'Cukup'},{w:'75%',bg:'#3b82f6',t:'Kuat'},{w:'100%',bg:'#10b981',t:'Sangat Kuat'}][Math.max(0,s-1)];
-    fill.style.width=lvl.w;fill.style.background=lvl.bg;txt.textContent='Kekuatan: '+lvl.t;txt.style.color=lvl.bg;
-}
-document.getElementById('regForm').addEventListener('submit', function() {
-    if (!document.getElementById('roleInput').value) {
-        alert('Pilih hak akses (role) terlebih dahulu.');
-        return false;
-    }
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Membuat...';
+document.addEventListener('DOMContentLoaded', function() {
+    const roleInput = document.getElementById('roleInput');
+    const roleCards = document.querySelectorAll('.role-card');
+    const regForm   = document.getElementById('regForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Role Selection
+    roleCards.forEach(card => {
+        card.addEventListener('click', function() {
+            roleCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            if (roleInput) roleInput.value = this.dataset.role;
+        });
+    });
+
+    // Password Toggle
+    document.querySelectorAll('.tpw-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            const iconId = this.dataset.icon;
+            const input = document.getElementById(targetId);
+            const icon = document.getElementById(iconId);
+            
+            if (input && icon) {
+                const isPw = input.type === 'password';
+                input.type = isPw ? 'text' : 'password';
+                icon.className = isPw ? 'fa fa-eye-slash' : 'fa fa-eye';
+            }
+        });
+    });
+
+    // Password Strength
+    const pwInput = document.getElementById('pw');
+    pwInput?.addEventListener('input', function() {
+        const val = this.value;
+        const strEl = document.getElementById('pwStr');
+        const fill = document.getElementById('pwFill');
+        const txt = document.getElementById('pwTxt');
+
+        if (!strEl) return;
+        if (!val) { strEl.style.display = 'none'; return; }
+        
+        strEl.style.display = 'block';
+        let s = 0;
+        if (val.length >= 8) s++;
+        if (/[A-Z]/.test(val)) s++;
+        if (/[0-9]/.test(val)) s++;
+        if (/[^A-Za-z0-9]/.test(val)) s++;
+        
+        const levels = [
+            {w:'25%',bg:'#ef4444',t:'Lemah'},
+            {w:'50%',bg:'#f59e0b',t:'Cukup'},
+            {w:'75%',bg:'#3b82f6',t:'Kuat'},
+            {w:'100%',bg:'#10b981',t:'Sangat Kuat'}
+        ];
+        const lvl = levels[Math.max(0, s - 1)];
+        
+        if (fill) { fill.style.width = lvl.w; fill.style.background = lvl.bg; }
+        if (txt) { txt.textContent = 'Kekuatan: ' + lvl.t; txt.style.color = lvl.bg; }
+    });
+
+    // Form Submission
+    regForm?.addEventListener('submit', function(e) {
+        if (roleInput && !roleInput.value) {
+            e.preventDefault();
+            alert('Pilih hak akses (role) terlebih dahulu.');
+            return;
+        }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Membuat...';
+        }
+    });
 });
 </script>
 @endpush

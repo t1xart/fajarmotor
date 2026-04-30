@@ -80,11 +80,11 @@
                     <td style="font-size:11px;color:var(--text3)">{{ $user->created_at->format('d M Y') }}</td>
                     <td>
                         @if($user->id !== auth()->id())
-                        <form method="POST" action="{{ route('admin.users.toggle', $user) }}" style="display:inline">
+                        <form method="POST" action="{{ route('admin.users.toggle', $user) }}" style="display:inline" class="toggle-form">
                             @csrf @method('PATCH')
-                            <button type="submit"
-                                style="background:{{ $user->is_active ? 'rgba(239,68,68,.1)' : 'rgba(16,185,129,.1)' }};color:{{ $user->is_active ? 'var(--danger)' : 'var(--success)' }};border:1px solid {{ $user->is_active ? 'rgba(239,68,68,.2)' : 'rgba(16,185,129,.2)' }};border-radius:7px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s"
-                                onclick="return confirm('{{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }} akun {{ $user->name }}?')">
+                            <button type="submit" class="btn-toggle-user"
+                                data-confirm="{{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }} akun {{ $user->name }}?"
+                                style="background:{{ $user->is_active ? 'rgba(239,68,68,.1)' : 'rgba(16,185,129,.1)' }};color:{{ $user->is_active ? 'var(--danger)' : 'var(--success)' }};border:1px solid {{ $user->is_active ? 'rgba(239,68,68,.2)' : 'rgba(16,185,129,.2)' }};border-radius:7px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s">
                                 <i class="fa fa-{{ $user->is_active ? 'ban' : 'check' }}" style="margin-right:4px"></i>
                                 {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                             </button>
@@ -98,3 +98,23 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.table');
+    table?.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-toggle-user');
+        if (btn) {
+            if (!confirm(btn.dataset.confirm)) {
+                e.preventDefault();
+            } else {
+                const btnContent = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Memproses...';
+            }
+        }
+    });
+});
+</script>
+@endpush

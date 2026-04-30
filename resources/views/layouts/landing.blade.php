@@ -149,13 +149,13 @@ footer::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;b
 <div id="cursor-glow"></div>
 
 <div id="mobileMenu">
-  <button class="mm-close" onclick="document.getElementById('mobileMenu').classList.remove('open')"><i class="fa fa-times"></i></button>
-  <a href="#layanan" onclick="document.getElementById('mobileMenu').classList.remove('open')">Layanan</a>
-  <a href="#sparepart" onclick="document.getElementById('mobileMenu').classList.remove('open')">Sparepart</a>
-  <a href="#bengkel" onclick="document.getElementById('mobileMenu').classList.remove('open')">Bengkel</a>
-  <a href="#tim" onclick="document.getElementById('mobileMenu').classList.remove('open')">Tim Kami</a>
-  <a href="#testimoni" onclick="document.getElementById('mobileMenu').classList.remove('open')">Testimoni</a>
-  <a href="{{ route('login') }}" style="color:#a5b4fc;margin-top:.5rem"><i class="fa fa-sign-in-alt" style="margin-right:.5rem"></i>Masuk Sistem</a>
+  <button class="mm-close" id="closeMobileMenu"><i class="fa fa-times"></i></button>
+  <a href="#layanan" class="mm-link">Layanan</a>
+  <a href="#sparepart" class="mm-link">Sparepart</a>
+  <a href="#bengkel" class="mm-link">Bengkel</a>
+  <a href="#tim" class="mm-link">Tim Kami</a>
+  <a href="#testimoni" class="mm-link">Testimoni</a>
+  <a href="{{ route('login') }}" class="mm-link" style="color:#a5b4fc;margin-top:.5rem"><i class="fa fa-sign-in-alt" style="margin-right:.5rem"></i>Masuk Sistem</a>
 </div>
 
 <nav id="navbar">
@@ -184,7 +184,7 @@ footer::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;b
       @endauth
     </div>
     <button id="landingDarkToggle" title="Toggle Dark Mode"><i class="fa fa-moon"></i></button>
-    <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.add('open')"><i class="fa fa-bars"></i></button>
+    <button class="hamburger" id="openMobileMenu"><i class="fa fa-bars"></i></button>
   </div>
 </nav>
 
@@ -245,13 +245,28 @@ footer::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;b
 // Cursor glow
 const glow = document.getElementById('cursor-glow');
 document.addEventListener('mousemove', e => {
-  glow.style.left = e.clientX + 'px';
-  glow.style.top = e.clientY + 'px';
+  if (glow) {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  }
 });
+
+// Mobile Menu
+const mobileMenu = document.getElementById('mobileMenu');
+const openBtn = document.getElementById('openMobileMenu');
+const closeBtn = document.getElementById('closeMobileMenu');
+const mmLinks = document.querySelectorAll('.mm-link');
+
+const toggleMM = (open) => mobileMenu?.classList.toggle('open', open);
+
+openBtn?.addEventListener('click', () => toggleMM(true));
+closeBtn?.addEventListener('click', () => toggleMM(false));
+mmLinks.forEach(l => l.addEventListener('click', () => toggleMM(false)));
 
 // Navbar scroll
 window.addEventListener('scroll', () => {
-  document.getElementById('navbar').classList.toggle('scrolled', scrollY > 60);
+  const navbar = document.getElementById('navbar');
+  if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 60);
 });
 
 // Reveal on scroll
@@ -263,7 +278,9 @@ document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => ob
 // Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
-    const t = document.querySelector(a.getAttribute('href'));
+    const targetId = a.getAttribute('href');
+    if (targetId === '#') return;
+    const t = document.querySelector(targetId);
     if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
 });
@@ -271,6 +288,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 // Counter animation
 function animateCounter(el) {
   const target = parseInt(el.dataset.target);
+  if (isNaN(target)) return;
   const duration = 1800;
   const step = target / (duration / 16);
   let current = 0;
@@ -293,15 +311,15 @@ document.querySelectorAll('.stats-section').forEach(el => counterObs.observe(el)
 // Dark mode
 const _html = document.documentElement;
 const _btn  = document.getElementById('landingDarkToggle');
-const _icon = _btn.querySelector('i');
+const _icon = _btn?.querySelector('i');
 function applyDark(dark) {
   _html.classList.toggle('dark', dark);
-  _icon.className = dark ? 'fa fa-sun' : 'fa fa-moon';
+  if (_icon) _icon.className = dark ? 'fa fa-sun' : 'fa fa-moon';
   localStorage.setItem('theme', dark ? 'dark' : 'light');
 }
 const _saved = localStorage.getItem('theme');
 applyDark(_saved ? _saved === 'dark' : window.matchMedia('(prefers-color-scheme:dark)').matches);
-_btn.addEventListener('click', () => applyDark(!_html.classList.contains('dark')));
+_btn?.addEventListener('click', () => applyDark(!_html.classList.contains('dark')));
 </script>
 @stack('scripts')
 </body>

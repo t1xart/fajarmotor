@@ -60,7 +60,7 @@
     display: flex; flex-direction: column; align-items: center; gap: 8px;
     cursor: pointer; transition: all .2s; text-decoration: none; text-align: center;
 }
-.qa-btn:hover { transform: translateY(-2px); }
+.qa-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.06); border-color: var(--primary); }
 .qa-btn .qa-ico { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 .qa-btn span { font-size: 11px; font-weight: 600; color: var(--muted); }
 @media(max-width:600px) { .qa-grid { grid-template-columns: repeat(2,1fr); } }
@@ -222,37 +222,37 @@
     <div class="card-body">
         <div class="qa-grid">
             @can('products.create')
-            <a href="{{ route('products.create') }}" class="qa-btn" style="border-color:rgba(99,102,241,.2)" onmouseover="this.style.borderColor='rgba(99,102,241,.5)';this.style.background='rgba(99,102,241,.06)'" onmouseout="this.style.borderColor='rgba(99,102,241,.2)';this.style.background='rgba(255,255,255,.03)'">
+            <a href="{{ route('products.create') }}" class="qa-btn" style="border-color:rgba(99,102,241,.2)">
                 <div class="qa-ico" style="background:rgba(99,102,241,.12);color:#6366f1"><i class="fa fa-plus"></i></div>
                 <span>Produk Baru</span>
             </a>
             @endcan
             @can('stock.in')
-            <a href="{{ route('stock.index') }}" class="qa-btn" style="border-color:rgba(16,185,129,.2)" onmouseover="this.style.borderColor='rgba(16,185,129,.5)';this.style.background='rgba(16,185,129,.06)'" onmouseout="this.style.borderColor='rgba(16,185,129,.2)';this.style.background='rgba(255,255,255,.03)'">
+            <a href="{{ route('stock.index') }}" class="qa-btn" style="border-color:rgba(16,185,129,.2)">
                 <div class="qa-ico" style="background:rgba(16,185,129,.12);color:#10b981"><i class="fa fa-arrow-down"></i></div>
                 <span>Stok Masuk</span>
             </a>
             @endcan
             @can('po.create')
-            <a href="{{ route('purchase-orders.create') }}" class="qa-btn" style="border-color:rgba(59,130,246,.2)" onmouseover="this.style.borderColor='rgba(59,130,246,.5)';this.style.background='rgba(59,130,246,.06)'" onmouseout="this.style.borderColor='rgba(59,130,246,.2)';this.style.background='rgba(255,255,255,.03)'">
+            <a href="{{ route('purchase-orders.create') }}" class="qa-btn" style="border-color:rgba(59,130,246,.2)">
                 <div class="qa-ico" style="background:rgba(59,130,246,.12);color:#3b82f6"><i class="fa fa-file-invoice"></i></div>
                 <span>Buat PO</span>
             </a>
             @endcan
             @can('wo.create')
-            <a href="{{ route('work-orders.create') }}" class="qa-btn" style="border-color:rgba(245,158,11,.2)" onmouseover="this.style.borderColor='rgba(245,158,11,.5)';this.style.background='rgba(245,158,11,.06)'" onmouseout="this.style.borderColor='rgba(245,158,11,.2)';this.style.background='rgba(255,255,255,.03)'">
+            <a href="{{ route('work-orders.create') }}" class="qa-btn" style="border-color:rgba(245,158,11,.2)">
                 <div class="qa-ico" style="background:rgba(245,158,11,.12);color:#f59e0b"><i class="fa fa-wrench"></i></div>
                 <span>Work Order</span>
             </a>
             @endcan
             @can('sales.create')
-            <a href="{{ route('sales.pos') }}" class="qa-btn" style="border-color:rgba(239,68,68,.2)" onmouseover="this.style.borderColor='rgba(239,68,68,.5)';this.style.background='rgba(239,68,68,.06)'" onmouseout="this.style.borderColor='rgba(239,68,68,.2)';this.style.background='rgba(255,255,255,.03)'">
+            <a href="{{ route('sales.pos') }}" class="qa-btn" style="border-color:rgba(239,68,68,.2)">
                 <div class="qa-ico" style="background:rgba(239,68,68,.12);color:#ef4444"><i class="fa fa-cash-register"></i></div>
                 <span>Buka Kasir</span>
             </a>
             @endcan
             @can('reports.view')
-            <a href="{{ route('reports.sales') }}" class="qa-btn" style="border-color:rgba(139,92,246,.2)" onmouseover="this.style.borderColor='rgba(139,92,246,.5)';this.style.background='rgba(139,92,246,.06)'" onmouseout="this.style.borderColor='rgba(139,92,246,.2)';this.style.background='rgba(255,255,255,.03)'">
+            <a href="{{ route('reports.sales') }}" class="qa-btn" style="border-color:rgba(139,92,246,.2)">
                 <div class="qa-ico" style="background:rgba(139,92,246,.12);color:#8b5cf6"><i class="fa fa-chart-bar"></i></div>
                 <span>Laporan</span>
             </a>

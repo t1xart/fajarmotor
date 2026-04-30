@@ -11,6 +11,12 @@ class Sale extends Model
 {
     use LogsActivity, SoftDeletes;
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_PARTIAL = 'partial';
+    public const STATUS_RETURNED = 'returned';
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = ['invoice_number', 'branch_id', 'customer_name', 'customer_phone', 'payment_method', 'subtotal', 'discount', 'tax', 'total', 'paid_amount', 'change_amount', 'status', 'notes', 'user_id'];
 
     protected $casts = ['subtotal' => 'decimal:2', 'discount' => 'decimal:2', 'tax' => 'decimal:2', 'total' => 'decimal:2', 'paid_amount' => 'decimal:2', 'change_amount' => 'decimal:2'];

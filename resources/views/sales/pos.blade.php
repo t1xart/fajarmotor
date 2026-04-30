@@ -225,140 +225,128 @@ function updateCart() {
                 <div style="font-size:.72rem;color:#6366f1">${fmt(item.price)}</div>
             </div>
             <div class="d-flex align-items-center gap-1">
-                <div class="qty-btn" onclick="changeQty(${item.id},-1)"><i class="fa fa-minus"></i></div>
+                <div class="qty-btn" data-action="decrease" data-id="${item.id}"><i class="fa fa-minus"></i></div>
                 <span style="font-size:.82rem;font-weight:700;min-width:20px;text-align:center">${item.qty}</span>
-                <div class="qty-btn" onclick="changeQty(${item.id},1)"><i class="fa fa-plus"></i></div>
+                <div class="qty-btn" data-action="increase" data-id="${item.id}"><i class="fa fa-plus"></i></div>
             </div>
             <div style="font-size:.78rem;font-weight:700;color:#10b981;min-width:70px;text-align:right">${fmt(item.price*item.qty)}</div>
-            <div class="qty-btn" onclick="removeItem(${item.id})" style="color:#ef4444"><i class="fa fa-times"></i></div>`;
+            <div class="qty-btn" data-action="remove" data-id="${item.id}" style="color:#ef4444"><i class="fa fa-times"></i></div>`;
         scroll.insertBefore(el, document.getElementById('emptyCart'));
     });
 }
 
-function addToCart(el) {
-    const {id, name, price, stock} = el.dataset;
-    if (cart[id]) { if (cart[id].qty < +stock) cart[id].qty++; }
-    else cart[id] = {id, name, price: +price, qty: 1, stock: +stock};
-    updateCart();
-}
-function changeQty(id, d) { if (cart[id]) { cart[id].qty = Math.max(1, Math.min(cart[id].stock, cart[id].qty + d)); updateCart(); } }
-function removeItem(id) { delete cart[id]; updateCart(); }
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Setup cart event listeners
-    document.querySelectorAll('.product-item:not(.out-of-stock)').forEach(el => el.addEventListener('click', function(e) { 
-        addToCart(this);
-    }, false));
-    
+    const cartScroll = document.getElementById('cartScroll');
+    const productGrid = document.getElementById('productGrid');
+    const productSearch = document.getElementById('productSearch');
     const clearCartBtn = document.getElementById('clearCart');
-    if (clearCartBtn) {
-        clearCartBtn.addEventListener('click', function() { cart = {}; updateCart(); }, false);
-    }
-    
     const discountInput = document.getElementById('discountInput');
-    if (discountInput) {
-        discountInput.addEventListener('input', updateCart, false);
-    }
-    
-    // Setup checkout form
-    const checkoutForm = document.getElementById('checkoutForm');
-    const checkoutModal = document.getElementById('checkoutModal');
     const checkoutBtn = document.getElementById('checkoutBtn');
-    
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (Object.keys(cart).length === 0) {
-                alert('Keranjang masih kosong');
-                return false;
-            }
-            
-            // Populate hidden fields
-            const discountValue = getDiscount();
-            document.getElementById('discountHidden').value = discountValue;
-            
-            const itemsContainer = document.getElementById('cartItemsHidden');
-            itemsContainer.innerHTML = '';
-            Object.values(cart).forEach((item, idx) => {
-                const input1 = document.createElement('input');
-                input1.type = 'hidden';
-                input1.name = `items[${idx}][product_id]`;
-                input1.value = item.id;
-                
-                const input2 = document.createElement('input');
-                input2.type = 'hidden';
-                input2.name = `items[${idx}][quantity]`;
-                input2.value = item.qty;
-                
-                const input3 = document.createElement('input');
-                input3.type = 'hidden';
-                input3.name = `items[${idx}][price]`;
-                input3.value = item.price;
-                
-                itemsContainer.appendChild(input1);
-                itemsContainer.appendChild(input2);
-                itemsContainer.appendChild(input3);
-            });
-            
-            // Show modal
-            const modal = new bootstrap.Modal(checkoutModal);
-            modal.show();
-        }, false);
-    }
-    
-    // Update change on input
+    const checkoutModal = document.getElementById('checkoutModal');
     const paidAmountInput = document.getElementById('paidAmount');
-    if (paidAmountInput) {
-        paidAmountInput.addEventListener('input', function() {
-            const total = Math.max(0, Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0) - getDiscount());
-            const paid = parseFloat(this.value) || 0;
-            const change = Math.max(0, paid - total);
-            document.getElementById('changeDisplay').textContent = fmt(change);
-        }, false);
+    const pmCashRadio = document.getElementById('pm_cash');
+
+    // Cart Management
+    function addToCart(el) {
+        const {id, name, price, stock} = el.dataset;
+        if (cart[id]) { if (cart[id].qty < +stock) cart[id].qty++; }
+        else cart[id] = {id, name, price: +price, qty: 1, stock: +stock};
+        updateCart();
     }
-});
 
-document.getElementById('productSearch').addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('.product-item').forEach(el => {
-        el.style.display = (el.dataset.name.toLowerCase().includes(q) || el.dataset.sku.toLowerCase().includes(q)) ? '' : 'none';
+    function changeQty(id, d) { 
+        if (cart[id]) { 
+            cart[id].qty = Math.max(1, Math.min(cart[id].stock, cart[id].qty + d)); 
+            updateCart(); 
+        } 
+    }
+
+    function removeItem(id) { 
+        delete cart[id]; 
+        updateCart(); 
+    }
+
+    // Product Click
+    productGrid?.addEventListener('click', function(e) {
+        const item = e.target.closest('.product-item:not(.out-of-stock)');
+        if (item) addToCart(item);
     });
-});
 
-document.getElementById('checkoutBtn').addEventListener('click', () => {
-    const items = Object.values(cart);
-    const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-    const total = Math.max(0, subtotal - getDiscount());
-    document.getElementById('discountHidden').value = getDiscount();
-    document.getElementById('paidAmount').value = total;
-    document.getElementById('changeDisplay').textContent = fmt(0);
-    const hidden = document.getElementById('cartItemsHidden');
-    hidden.innerHTML = '';
-    items.forEach((item, i) => {
-        hidden.innerHTML += `<input type="hidden" name="items[${i}][product_id]" value="${item.id}">
-            <input type="hidden" name="items[${i}][quantity]" value="${item.qty}">
-            <input type="hidden" name="items[${i}][sell_price]" value="${item.price}">
-            <input type="hidden" name="items[${i}][discount]" value="0">`;
+    // Cart Actions (Delegation)
+    cartScroll?.addEventListener('click', function(e) {
+        const btn = e.target.closest('.qty-btn');
+        if (!btn) return;
+        
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        
+        if (action === 'increase') changeQty(id, 1);
+        else if (action === 'decrease') changeQty(id, -1);
+        else if (action === 'remove') removeItem(id);
     });
-    new bootstrap.Modal(document.getElementById('checkoutModal')).show();
-});
 
-document.getElementById('paidAmount').addEventListener('input', function() {
-    const items = Object.values(cart);
-    const total = Math.max(0, items.reduce((s,i)=>s+i.price*i.qty,0) - getDiscount());
-    document.getElementById('changeDisplay').textContent = fmt(Math.max(0, +this.value - total));
-});
+    clearCartBtn?.addEventListener('click', () => { cart = {}; updateCart(); });
+    discountInput?.addEventListener('input', updateCart);
 
-// Style btn-check labels
-document.querySelectorAll('.btn-check').forEach(r => {
-    r.addEventListener('change', () => {
-        document.querySelectorAll('.btn-check').forEach(x => {
-            x.nextElementSibling.style.borderColor = x.checked ? '#6366f1' : '#e2e8f0';
-            x.nextElementSibling.style.background = x.checked ? '#ede9fe' : '#fff';
-            x.nextElementSibling.style.color = x.checked ? '#6366f1' : '#374151';
+    // Search
+    productSearch?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.product-item').forEach(el => {
+            const match = el.dataset.name.toLowerCase().includes(q) || el.dataset.sku.toLowerCase().includes(q);
+            el.style.display = match ? '' : 'none';
         });
     });
+
+    // Checkout
+    checkoutBtn?.addEventListener('click', function(e) {
+        e.preventDefault();
+        const items = Object.values(cart);
+        if (items.length === 0) {
+            alert('Keranjang masih kosong');
+            return;
+        }
+
+        const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+        const total = Math.max(0, subtotal - getDiscount());
+        
+        document.getElementById('discountHidden').value = getDiscount();
+        document.getElementById('paidAmount').value = total;
+        document.getElementById('changeDisplay').textContent = fmt(0);
+        
+        const hidden = document.getElementById('cartItemsHidden');
+        hidden.innerHTML = '';
+        items.forEach((item, i) => {
+            hidden.innerHTML += `<input type="hidden" name="items[${i}][product_id]" value="${item.id}">
+                <input type="hidden" name="items[${i}][quantity]" value="${item.qty}">
+                <input type="hidden" name="items[${i}][sell_price]" value="${item.price}">
+                <input type="hidden" name="items[${i}][discount]" value="0">`;
+        });
+
+        const modal = new bootstrap.Modal(checkoutModal);
+        modal.show();
+    });
+
+    paidAmountInput?.addEventListener('input', function() {
+        const items = Object.values(cart);
+        const total = Math.max(0, items.reduce((s, i) => s + i.price * i.qty, 0) - getDiscount());
+        const paid = parseFloat(this.value) || 0;
+        document.getElementById('changeDisplay').textContent = fmt(Math.max(0, paid - total));
+    });
+
+    // Payment Method Styling
+    document.querySelectorAll('.btn-check').forEach(r => {
+        r.addEventListener('change', () => {
+            document.querySelectorAll('.btn-check').forEach(x => {
+                const lbl = x.nextElementSibling;
+                if (!lbl) return;
+                lbl.style.borderColor = x.checked ? '#6366f1' : '#e2e8f0';
+                lbl.style.background = x.checked ? '#ede9fe' : '#fff';
+                lbl.style.color = x.checked ? '#6366f1' : '#374151';
+            });
+        });
+    });
+
+    if (pmCashRadio) pmCashRadio.dispatchEvent(new Event('change'));
 });
-document.getElementById('pm_cash').dispatchEvent(new Event('change'));
 </script>
 @endpush

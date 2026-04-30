@@ -204,7 +204,7 @@ html.dark .fi:focus{background:rgba(255,255,255,.07)}
           <i class="fa fa-lock ii"></i>
           <input type="password" id="pw" name="password" class="fi {{ $errors->has('password') ? 'err' : '' }}"
             placeholder="••••••••" required autocomplete="current-password" maxlength="128">
-          <button type="button" class="tpw" onclick="togglePw()"><i class="fa fa-eye" id="pwi"></i></button>
+          <button type="button" class="tpw" id="tpwBtn"><i class="fa fa-eye" id="pwi"></i></button>
         </div>
       </div>
 
@@ -231,24 +231,56 @@ html.dark .fi:focus{background:rgba(255,255,255,.07)}
 </div>
 
 <script>
-// Dark mode
-const html=document.documentElement,dti=document.getElementById('dti');
-function applyDark(d){html.classList.toggle('dark',d);dti.className=d?'fa fa-sun':'fa fa-moon';localStorage.setItem('theme',d?'dark':'light')}
-const s=localStorage.getItem('theme');
-applyDark(s?s==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches);
-document.getElementById('dt').addEventListener('click',()=>applyDark(!html.classList.contains('dark')));
+document.addEventListener('DOMContentLoaded', function() {
+    // Dark mode
+    const html = document.documentElement;
+    const dt = document.getElementById('dt');
+    const dti = document.getElementById('dti');
+    
+    function applyDark(d) {
+        html.classList.toggle('dark', d);
+        if (dti) dti.className = d ? 'fa fa-sun' : 'fa fa-moon';
+        localStorage.setItem('theme', d ? 'dark' : 'light');
+    }
 
-// Toggle password
-function togglePw(){const p=document.getElementById('pw'),i=document.getElementById('pwi');p.type=p.type==='password'?'text':'password';i.className=p.type==='password'?'fa fa-eye':'fa fa-eye-slash'}
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme:dark)').matches;
+    applyDark(savedTheme ? savedTheme === 'dark' : prefersDark);
 
-// Submit
-document.getElementById('lf').addEventListener('submit',function(e){
-  const hp=this.querySelector('[name="website"]');
-  if(hp&&hp.value){e.preventDefault();return}
-  const b=document.getElementById('sb');
-  b.disabled=true;b.innerHTML='<i class="fa fa-spinner fa-spin"></i> Memproses...';
+    dt?.addEventListener('click', () => applyDark(!html.classList.contains('dark')));
+
+    // Toggle password
+    const pwInput = document.getElementById('pw');
+    const pwToggle = document.getElementById('tpwBtn');
+    const pwIcon = document.getElementById('pwi');
+
+    pwToggle?.addEventListener('click', function() {
+        if (!pwInput || !pwIcon) return;
+        const isPw = pwInput.type === 'password';
+        pwInput.type = isPw ? 'text' : 'password';
+        pwIcon.className = isPw ? 'fa fa-eye-slash' : 'fa fa-eye';
+    });
+
+    // Submit
+    const loginForm = document.getElementById('lf');
+    const submitBtn = document.getElementById('sb');
+
+    loginForm?.addEventListener('submit', function(e) {
+        const hp = this.querySelector('[name="website"]');
+        if (hp && hp.value) {
+            e.preventDefault();
+            return;
+        }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Memproses...';
+        }
+    });
+
+    @if($errors->any()) 
+    if (pwInput) pwInput.value = ''; 
+    @endif
 });
-@if($errors->any()) document.getElementById('pw').value=''; @endif
 </script>
 </body>
 </html>

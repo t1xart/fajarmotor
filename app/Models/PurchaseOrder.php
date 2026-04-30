@@ -11,6 +11,12 @@ class PurchaseOrder extends Model
 {
     use LogsActivity, SoftDeletes;
 
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_SENT = 'sent';
+    public const STATUS_PARTIAL = 'partial';
+    public const STATUS_RECEIVED = 'received';
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = ['po_number', 'supplier_id', 'branch_id', 'status', 'total_amount', 'notes', 'ordered_at', 'received_at', 'user_id'];
 
     protected $casts = ['ordered_at' => 'datetime', 'received_at' => 'datetime', 'total_amount' => 'decimal:2'];

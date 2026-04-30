@@ -207,18 +207,15 @@
       ];
       @endphp
       @foreach($svcs as $i=>[$t,$d,$img,$ic,$bg,$col])
-      <div class="reveal d{{ ($i%3)+1 }}" style="background:#fff;border-radius:1.25rem;border:1px solid var(--border);overflow:hidden;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:default"
-           onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,.1)';this.style.borderColor='#c7d2fe'"
-           onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='var(--border)'">
-        <div style="height:190px;overflow:hidden;position:relative">
-          <img src="{{ $img }}" alt="{{ $t }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .5s ease"
-               onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform=''">
-          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(15,23,42,.5),transparent)"></div>
+      <div class="svc-card reveal d{{ ($i%3)+1 }}">
+        <div class="svc-img-wrap">
+          <img src="{{ $img }}" alt="{{ $t }}" loading="lazy">
+          <div class="svc-overlay"></div>
         </div>
-        <div style="padding:1.5rem">
-          <div style="width:44px;height:44px;border-radius:.65rem;background:{{ $bg }};color:{{ $col }};display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:1rem"><i class="fa {{ $ic }}"></i></div>
-          <h3 style="font-size:.95rem;font-weight:700;color:var(--dark);margin-bottom:.45rem">{{ $t }}</h3>
-          <p style="font-size:.82rem;color:var(--muted);line-height:1.75">{{ $d }}</p>
+        <div class="svc-body">
+          <div class="svc-icon" style="background:{{ $bg }};color:{{ $col }}"><i class="fa {{ $ic }}"></i></div>
+          <h3 class="svc-title">{{ $t }}</h3>
+          <p class="svc-desc">{{ $d }}</p>
         </div>
       </div>
       @endforeach
@@ -248,27 +245,22 @@
       ];
       @endphp
       @foreach($parts as $i=>[$name,$img,$cat])
-      <div class="reveal d{{ ($i%4)+1 }}" style="border-radius:1rem;overflow:hidden;border:1px solid var(--border);background:#fff;transition:all .3s cubic-bezier(.4,0,.2,1)"
-           onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 16px 48px rgba(99,102,241,.12)';this.style.borderColor='#c7d2fe'"
-           onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='var(--border)'">
-        <div style="height:150px;overflow:hidden;position:relative">
-          <img src="{{ $img }}" alt="{{ $name }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .5s ease"
-               onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform=''">
-          <div style="position:absolute;top:.6rem;right:.6rem;background:rgba(99,102,241,.9);color:#fff;font-size:.62rem;font-weight:700;padding:.2rem .55rem;border-radius:99px">{{ $cat }}</div>
+      <div class="part-card reveal d{{ ($i%4)+1 }}">
+        <div class="part-img-wrap">
+          <img src="{{ $img }}" alt="{{ $name }}" loading="lazy">
+          <div class="part-cat">{{ $cat }}</div>
         </div>
-        <div style="padding:.9rem 1rem">
-          <div style="font-size:.82rem;font-weight:700;color:var(--dark)">{{ $name }}</div>
-          <div style="font-size:.72rem;color:var(--muted);margin-top:.2rem;display:flex;align-items:center;gap:.3rem">
-            <span style="width:6px;height:6px;background:#10b981;border-radius:50%;display:inline-block"></span>Stok Tersedia
+        <div class="part-body">
+          <div class="part-name">{{ $name }}</div>
+          <div class="part-status">
+            <span class="status-dot"></span>Stok Tersedia
           </div>
         </div>
       </div>
       @endforeach
     </div>
     <div style="text-align:center;margin-top:3rem" class="reveal">
-      <a href="{{ route('login') }}" style="display:inline-flex;align-items:center;gap:.65rem;padding:.85rem 2.25rem;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:.75rem;color:#fff;text-decoration:none;font-weight:700;font-size:.875rem;box-shadow:0 8px 24px rgba(99,102,241,.35);transition:all .25s"
-         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 16px 40px rgba(99,102,241,.45)'"
-         onmouseout="this.style.transform='';this.style.boxShadow='0 8px 24px rgba(99,102,241,.35)'">
+      <a href="{{ route('login') }}" class="btn-all-parts">
         <i class="fa fa-box"></i> Lihat Semua Sparepart di Sistem
       </a>
     </div>
@@ -284,13 +276,12 @@
       <p class="section-desc">Dilengkapi peralatan modern, ruang tunggu nyaman, dan sistem manajemen digital untuk pengalaman servis terbaik.</p>
     </div>
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:260px 260px;gap:1rem;margin-top:3.5rem">
-      <div class="reveal-left" style="grid-row:1/3;border-radius:1.5rem;overflow:hidden;position:relative;box-shadow:var(--sh2)">
-        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=85" alt="Area Servis Utama" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .6s ease"
-             onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">
-        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(15,23,42,.75) 0%,transparent 50%)"></div>
-        <div style="position:absolute;bottom:1.5rem;left:1.5rem">
-          <div style="font-weight:800;font-size:1.05rem;color:#fff">Area Servis Utama</div>
-          <div style="font-size:.78rem;color:#94a3b8;margin-top:.25rem">Kapasitas 10 motor sekaligus</div>
+      <div class="gallery-main reveal-left">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=85" alt="Area Servis Utama" loading="lazy">
+        <div class="gallery-overlay"></div>
+        <div class="gallery-caption">
+          <div class="caption-title">Area Servis Utama</div>
+          <div class="caption-sub">Kapasitas 10 motor sekaligus</div>
         </div>
       </div>
       @foreach([
@@ -299,11 +290,10 @@
         ['https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80','Area Kelistrikan'],
         ['https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&q=80','Ruang Tunggu'],
       ] as $i=>[$img,$label])
-      <div class="reveal d{{ $i+1 }}" style="border-radius:1.1rem;overflow:hidden;position:relative;box-shadow:var(--sh)">
-        <img src="{{ $img }}" alt="{{ $label }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .5s ease"
-             onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform=''">
-        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(15,23,42,.6),transparent)"></div>
-        <div style="position:absolute;bottom:.85rem;left:.85rem;color:#fff;font-size:.78rem;font-weight:600">{{ $label }}</div>
+      <div class="gallery-item reveal d{{ $i+1 }}">
+        <img src="{{ $img }}" alt="{{ $label }}" loading="lazy">
+        <div class="gallery-item-overlay"></div>
+        <div class="gallery-item-label">{{ $label }}</div>
       </div>
       @endforeach
     </div>
@@ -329,23 +319,20 @@
       ];
       @endphp
       @foreach($team as $i=>[$n,$r,$exp,$ph])
-      <div class="reveal d{{ $i+1 }}" style="text-align:center;background:#fff;border-radius:1.25rem;border:1px solid var(--border);padding:1.75rem 1.25rem;transition:all .3s"
-           onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 48px rgba(99,102,241,.12)';this.style.borderColor='#c7d2fe'"
-           onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='var(--border)'">
-        <div style="position:relative;display:inline-block;margin-bottom:1.25rem">
-          <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:4px solid var(--pll);margin:0 auto;box-shadow:0 8px 24px rgba(99,102,241,.2);position:relative">
-            <img src="{{ $ph }}" alt="{{ $n }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .4s"
-                 onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform=''">
+      <div class="team-card reveal d{{ $i+1 }}">
+        <div class="team-avatar-wrap">
+          <div class="team-avatar">
+            <img src="{{ $ph }}" alt="{{ $n }}" loading="lazy">
           </div>
-          <div style="position:absolute;bottom:2px;right:2px;width:28px;height:28px;background:#10b981;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(16,185,129,.4)">
-            <i class="fa fa-check" style="color:#fff;font-size:.55rem"></i>
+          <div class="team-verified">
+            <i class="fa fa-check"></i>
           </div>
         </div>
-        <div style="font-weight:700;font-size:.95rem;color:var(--dark)">{{ $n }}</div>
-        <div style="font-size:.8rem;color:var(--p);font-weight:600;margin:.25rem 0">{{ $r }}</div>
-        <div style="font-size:.72rem;color:var(--muted)">{{ $exp }} pengalaman</div>
-        <div style="display:flex;justify-content:center;gap:.3rem;margin-top:.85rem">
-          @for($s=0;$s<5;$s++)<i class="fa fa-star" style="color:#f59e0b;font-size:.68rem"></i>@endfor
+        <div class="team-name">{{ $n }}</div>
+        <div class="team-role">{{ $r }}</div>
+        <div class="team-exp">{{ $exp }} pengalaman</div>
+        <div class="team-rating">
+          @for($s=0;$s<5;$s++)<i class="fa fa-star"></i>@endfor
         </div>
       </div>
       @endforeach
@@ -366,22 +353,20 @@
       $testi=[
         ['Doni Kusuma','Pelanggan Setia, Jakarta','https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80','Servis cepat dan hasilnya memuaskan! Motor saya yang sudah lama bermasalah akhirnya bisa normal kembali. Harga juga sangat terjangkau.'],
         ['Rina Wulandari','Pemilik Motor, Bandung','https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80','Sparepart lengkap dan original. Saya tidak perlu khawatir lagi soal keaslian barang. Teknisinya juga ramah dan profesional.'],
-        ['Hendra Wijaya','Pengusaha, Surabaya','https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80','Sistem manajemennya luar biasa! Stok terpantau real-time, laporan otomatis. Sangat membantu operasional bengkel saya.'],
+        ['Hendra Wijaya','Pemilik Bengkel, Surabaya','https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80','Sistem manajemennya luar biasa! Stok terpantau real-time, laporan otomatis. Sangat membantu operasional bengkel saya.'],
       ];
       @endphp
       @foreach($testi as $i=>[$n,$r,$ph,$txt])
-      <div class="reveal d{{ $i+1 }}" style="background:#fff;border-radius:1.25rem;border:1px solid var(--border);padding:1.75rem;transition:all .3s"
-           onmouseover="this.style.boxShadow='0 12px 40px rgba(0,0,0,.08)';this.style.borderColor='#c7d2fe';this.style.transform='translateY(-4px)'"
-           onmouseout="this.style.boxShadow='';this.style.borderColor='var(--border)';this.style.transform=''">
-        <div style="color:#f59e0b;font-size:.82rem;margin-bottom:.9rem">
+      <div class="testi-card reveal d{{ $i+1 }}">
+        <div class="testi-stars">
           @for($s=0;$s<5;$s++)<i class="fa fa-star"></i>@endfor
         </div>
-        <p style="font-size:.85rem;color:var(--muted);line-height:1.85;margin-bottom:1.5rem;font-style:italic">"{{ $txt }}"</p>
-        <div style="display:flex;align-items:center;gap:.85rem">
-          <img src="{{ $ph }}" alt="{{ $n }}" loading="lazy" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--pll);box-shadow:0 4px 12px rgba(99,102,241,.15)">
+        <p class="testi-text">"{{ $txt }}"</p>
+        <div class="testi-user">
+          <img src="{{ $ph }}" alt="{{ $n }}" loading="lazy">
           <div>
-            <div style="font-size:.85rem;font-weight:700;color:var(--dark)">{{ $n }}</div>
-            <div style="font-size:.72rem;color:var(--muted)">{{ $r }}</div>
+            <div class="user-name">{{ $n }}</div>
+            <div class="user-role">{{ $r }}</div>
           </div>
         </div>
       </div>
@@ -398,9 +383,7 @@
     </div>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;align-items:center" class="reveal">
       @foreach(['Honda','Yamaha','Suzuki','Kawasaki','TVS','Bajaj','Royal Enfield'] as $brand)
-      <div style="background:var(--light);border:1.5px solid var(--border);border-radius:.65rem;padding:.6rem 1.75rem;font-size:.85rem;font-weight:700;color:var(--muted);transition:all .25s;cursor:default"
-           onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1';this.style.background='#ede9fe';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';this.style.background='var(--light)';this.style.transform=''">
+      <div class="brand-tag">
         {{ $brand }}
       </div>
       @endforeach
@@ -420,21 +403,15 @@
     <p style="color:#94a3b8;font-size:.95rem;margin-bottom:2.5rem;max-width:520px;margin-left:auto;margin-right:auto">Masuk ke sistem dan mulai kelola sparepart, servis, dan keuangan bengkel dengan lebih mudah dan profesional.</p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
       @auth
-        <a href="{{ route('dashboard') }}" style="display:inline-flex;align-items:center;gap:.65rem;padding:.9rem 2rem;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:.75rem;font-size:.9rem;font-weight:700;color:#fff;text-decoration:none;box-shadow:0 8px 32px rgba(99,102,241,.5);transition:all .25s"
-           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 16px 48px rgba(99,102,241,.6)'"
-           onmouseout="this.style.transform='';this.style.boxShadow='0 8px 32px rgba(99,102,241,.5)'">
+        <a href="{{ route('dashboard') }}" class="cta-primary">
           <i class="fa fa-gauge-high"></i> Buka Dashboard
         </a>
       @else
-        <a href="{{ route('login') }}" style="display:inline-flex;align-items:center;gap:.65rem;padding:.9rem 2rem;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:.75rem;font-size:.9rem;font-weight:700;color:#fff;text-decoration:none;box-shadow:0 8px 32px rgba(99,102,241,.5);transition:all .25s"
-           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 16px 48px rgba(99,102,241,.6)'"
-           onmouseout="this.style.transform='';this.style.boxShadow='0 8px 32px rgba(99,102,241,.5)'">
+        <a href="{{ route('login') }}" class="cta-primary">
           <i class="fa fa-sign-in-alt"></i> Masuk ke Sistem
         </a>
       @endif
-      <a href="#kontak" style="display:inline-flex;align-items:center;gap:.65rem;padding:.9rem 2rem;border:1.5px solid rgba(255,255,255,.15);border-radius:.75rem;font-size:.9rem;font-weight:600;color:#cbd5e1;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px)"
-         onmouseover="this.style.borderColor='rgba(255,255,255,.4)';this.style.color='#fff';this.style.background='rgba(255,255,255,.05)'"
-         onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='#cbd5e1';this.style.background=''">
+      <a href="#kontak" class="cta-secondary">
         <i class="fa fa-phone"></i> Hubungi Kami
       </a>
     </div>
@@ -447,22 +424,24 @@
 <script>
 // Particle effect
 const pc=document.getElementById('particles');
-for(let i=0;i<30;i++){
-  const p=document.createElement('div');
-  p.className='particle';
-  p.style.left=Math.random()*100+'%';
-  p.style.width=p.style.height=(Math.random()*3+1)+'px';
-  p.style.background=`rgba(${Math.random()>0.5?'99,102,241':'139,92,246'},${Math.random()*.3+.2})`;
-  p.style.animationDuration=(Math.random()*15+10)+'s';
-  p.style.animationDelay=Math.random()*5+'s';
-  pc.appendChild(p);
+if (pc) {
+  for(let i=0;i<30;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.width=p.style.height=(Math.random()*3+1)+'px';
+    p.style.background=`rgba(${Math.random()>0.5?'99,102,241':'139,92,246'},${Math.random()*.3+.2})`;
+    p.style.animationDuration=(Math.random()*15+10)+'s';
+    p.style.animationDelay=Math.random()*5+'s';
+    pc.appendChild(p);
+  }
 }
 
 // Hero bg parallax
 window.addEventListener('scroll',()=>{
   const s=scrollY;
   const bg=document.getElementById('heroBgPhoto');
-  if(bg)bg.style.transform=`scale(1.05) translateY(${s*.3}px)`;
+  if(bg) bg.style.transform=`scale(1.05) translateY(${s*.3}px)`;
 });
 
 // Counter animation on stats
@@ -490,6 +469,76 @@ document.querySelectorAll('.stats-section').forEach(el=>statsObs.observe(el));
 
 @push('styles')
 <style>
+/* ══ HOVER EFFECTS (REPLACING INLINE JS) ══════════════════════════ */
+.svc-card { background:#fff;border-radius:1.25rem;border:1px solid var(--border);overflow:hidden;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:default; }
+.svc-card:hover { transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,.1);border-color:#c7d2fe; }
+.svc-img-wrap { height:190px;overflow:hidden;position:relative; }
+.svc-img-wrap img { width:100%;height:100%;object-fit:cover;transition:transform .5s ease; }
+.svc-card:hover .svc-img-wrap img { transform:scale(1.07); }
+.svc-overlay { position:absolute;inset:0;background:linear-gradient(to top,rgba(15,23,42,.5),transparent); }
+.svc-body { padding:1.5rem; }
+.svc-icon { width:44px;height:44px;border-radius:.65rem;display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:1rem; }
+.svc-title { font-size:.95rem;font-weight:700;color:var(--dark);margin-bottom:.45rem; }
+.svc-desc { font-size:.82rem;color:var(--muted);line-height:1.75; }
+
+.part-card { border-radius:1rem;overflow:hidden;border:1px solid var(--border);background:#fff;transition:all .3s cubic-bezier(.4,0,.2,1); }
+.part-card:hover { transform:translateY(-5px);box-shadow:0 16px 48px rgba(99,102,241,.12);border-color:#c7d2fe; }
+.part-img-wrap { height:150px;overflow:hidden;position:relative; }
+.part-img-wrap img { width:100%;height:100%;object-fit:cover;transition:transform .5s ease; }
+.part-card:hover .part-img-wrap img { transform:scale(1.1); }
+.part-cat { position:absolute;top:.6rem;right:.6rem;background:rgba(99,102,241,.9);color:#fff;font-size:.62rem;font-weight:700;padding:.2rem .55rem;border-radius:99px; }
+.part-body { padding:.9rem 1rem; }
+.part-name { font-size:.82rem;font-weight:700;color:var(--dark); }
+.part-status { font-size:.72rem;color:var(--muted);margin-top:.2rem;display:flex;align-items:center;gap:.3rem; }
+.status-dot { width:6px;height:6px;background:#10b981;border-radius:50%;display:inline-block; }
+
+.btn-all-parts { display:inline-flex;align-items:center;gap:.65rem;padding:.85rem 2.25rem;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:.75rem;color:#fff;text-decoration:none;font-weight:700;font-size:.875rem;box-shadow:0 8px 24px rgba(99,102,241,.35);transition:all .25s; }
+.btn-all-parts:hover { transform:translateY(-2px);box-shadow:0 16px 40px rgba(99,102,241,.45); color: #fff; }
+
+.gallery-main { grid-row:1/3;border-radius:1.5rem;overflow:hidden;position:relative;box-shadow:var(--sh2); }
+.gallery-main img { width:100%;height:100%;object-fit:cover;transition:transform .6s ease; }
+.gallery-main:hover img { transform:scale(1.04); }
+.gallery-overlay { position:absolute;inset:0;background:linear-gradient(to top,rgba(15,23,42,.75) 0%,transparent 50%); }
+.gallery-caption { position:absolute;bottom:1.5rem;left:1.5rem; }
+.caption-title { font-weight:800;font-size:1.05rem;color:#fff; }
+.caption-sub { font-size:.78rem;color:#94a3b8;margin-top:.25rem; }
+
+.gallery-item { border-radius:1.1rem;overflow:hidden;position:relative;box-shadow:var(--sh); }
+.gallery-item img { width:100%;height:100%;object-fit:cover;transition:transform .5s ease; }
+.gallery-item:hover img { transform:scale(1.06); }
+.gallery-item-overlay { position:absolute;inset:0;background:linear-gradient(to top,rgba(15,23,42,.6),transparent); }
+.gallery-item-label { position:absolute;bottom:.85rem;left:.85rem;color:#fff;font-size:.78rem;font-weight:600; }
+
+.team-card { text-align:center;background:#fff;border-radius:1.25rem;border:1px solid var(--border);padding:1.75rem 1.25rem;transition:all .3s; }
+.team-card:hover { transform:translateY(-6px);box-shadow:0 16px 48px rgba(99,102,241,.12);border-color:#c7d2fe; }
+.team-avatar-wrap { position:relative;display:inline-block;margin-bottom:1.25rem; }
+.team-avatar { width:120px;height:120px;border-radius:50%;overflow:hidden;border:4px solid var(--pll);margin:0 auto;box-shadow:0 8px 24px rgba(99,102,241,.2);position:relative; }
+.team-avatar img { width:100%;height:100%;object-fit:cover;transition:transform .4s; }
+.team-card:hover .team-avatar img { transform:scale(1.08); }
+.team-verified { position:absolute;bottom:2px;right:2px;width:28px;height:28px;background:#10b981;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(16,185,129,.4); }
+.team-verified i { color:#fff;font-size:.55rem; }
+.team-name { font-weight:700;font-size:.95rem;color:var(--dark); }
+.team-role { font-size:.8rem;color:var(--p);font-weight:600;margin:.25rem 0; }
+.team-exp { font-size:.72rem;color:var(--muted); }
+.team-rating { display:flex;justify-content:center;gap:.3rem;margin-top:.85rem;color:#f59e0b;font-size:.68rem; }
+
+.testi-card { background:#fff;border-radius:1.25rem;border:1px solid var(--border);padding:1.75rem;transition:all .3s; }
+.testi-card:hover { boxShadow:0 12px 40px rgba(0,0,0,.08);border-color:#c7d2fe;transform:translateY(-4px); }
+.testi-stars { color:#f59e0b;font-size:.82rem;margin-bottom:.9rem; }
+.testi-text { font-size:.85rem;color:var(--muted);line-height:1.85;margin-bottom:1.5rem;font-style:italic; }
+.testi-user { display:flex;align-items:center;gap:.85rem; }
+.testi-user img { width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--pll);box-shadow:0 4px 12px rgba(99,102,241,.15); }
+.testi-user .user-name { font-size:.85rem;font-weight:700;color:var(--dark); }
+.testi-user .user-role { font-size:.72rem;color:var(--muted); }
+
+.brand-tag { background:var(--light);border:1.5px solid var(--border);border-radius:.65rem;padding:.6rem 1.75rem;font-size:.85rem;font-weight:700;color:var(--muted);transition:all .25s;cursor:default; }
+.brand-tag:hover { border-color:#6366f1;color:#6366f1;background:#ede9fe;transform:translateY(-2px); }
+
+.cta-primary { display:inline-flex;align-items:center;gap:.65rem;padding:.9rem 2rem;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:.75rem;font-size:.9rem;font-weight:700;color:#fff;text-decoration:none;box-shadow:0 8px 32px rgba(99,102,241,.5);transition:all .25s; }
+.cta-primary:hover { transform:translateY(-2px);box-shadow:0 16px 48px rgba(99,102,241,.6); color: #fff; }
+.cta-secondary { display:inline-flex;align-items:center;gap:.65rem;padding:.9rem 2rem;border:1.5px solid rgba(255,255,255,.15);border-radius:.75rem;font-size:.9rem;font-weight:600;color:#cbd5e1;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px); }
+.cta-secondary:hover { border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.05); }
+
 @media(max-width:1024px){
   #layanan>div>div:nth-child(2){grid-template-columns:repeat(2,1fr)!important}
   #sparepart>div>div:nth-child(2){grid-template-columns:repeat(3,1fr)!important}

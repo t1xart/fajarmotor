@@ -67,7 +67,7 @@ class SaleController extends Controller
                 $total = $subtotal - $discount + $tax;
 
                 $paidAmount = $request->paid_amount ?? 0;
-                $status = $paidAmount >= $total ? 'paid' : ($paidAmount > 0 ? 'partial' : 'pending');
+                $status = $paidAmount >= $total ? Sale::STATUS_PAID : ($paidAmount > 0 ? Sale::STATUS_PARTIAL : Sale::STATUS_PENDING);
 
                 // Create sale
                 $sale = Sale::create([
@@ -135,7 +135,7 @@ class SaleController extends Controller
     {
         $this->authorize('processReturn', $sale);
 
-        if ($sale->status === 'returned') {
+        if ($sale->status === Sale::STATUS_RETURNED) {
             return back()->withErrors(['error' => 'Transaksi ini sudah diretur sebelumnya.']);
         }
 
@@ -143,7 +143,7 @@ class SaleController extends Controller
             DB::transaction(function () use ($sale) {
                 $warehouse = Warehouse::where('branch_id', $sale->branch_id)->firstOrFail();
                 $sale->load('items.product');
-                $sale->update(['status' => 'returned']);
+                $sale->update(['status' => Sale::STATUS_RETURNED]);
 
                 // Restore stock for all items
                 foreach ($sale->items as $item) {
@@ -177,7 +177,7 @@ class SaleController extends Controller
     {
         $this->authorize('delete', $sale);
 
-        if ($sale->status === 'returned') {
+        if ($sale->status === Sale::STATUS_RETURNED) {
             return back()->withErrors(['error' => 'Transaksi yang sudah diretur tidak bisa dihapus.']);
         }
 
@@ -186,7 +186,7 @@ class SaleController extends Controller
                 $warehouse = Warehouse::where('branch_id', $sale->branch_id)->firstOrFail();
 
                 // If not already returned, restore stock
-                if ($sale->status !== 'returned') {
+                if ($sale->status !== Sale::STATUS_RETURNED) {
                     foreach ($sale->items as $item) {
                         $this->stockService->createMutation(
                             $item->product,

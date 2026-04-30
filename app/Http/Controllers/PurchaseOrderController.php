@@ -45,7 +45,7 @@ class PurchaseOrderController extends Controller
                 'po_number' => PoNumberService::generate(),
                 'supplier_id' => $request->supplier_id,
                 'branch_id' => auth()->user()->branch_id,
-                'status' => 'draft',
+                'status' => PurchaseOrder::STATUS_DRAFT,
                 'total_amount' => $items->sum(fn ($i) => $i['buy_price'] * $i['quantity']),
                 'notes' => $request->notes,
                 'ordered_at' => $request->ordered_at ?? now(),
@@ -107,7 +107,7 @@ class PurchaseOrderController extends Controller
                 }
 
                 $purchaseOrder->update([
-                    'status' => $allReceived ? 'received' : 'partial',
+                    'status' => $allReceived ? PurchaseOrder::STATUS_RECEIVED : PurchaseOrder::STATUS_PARTIAL,
                     'received_at' => now(),
                 ]);
             });
@@ -120,7 +120,7 @@ class PurchaseOrderController extends Controller
 
     public function destroy(PurchaseOrder $purchaseOrder)
     {
-        if (in_array($purchaseOrder->status, ['received', 'partial'])) {
+        if (in_array($purchaseOrder->status, [PurchaseOrder::STATUS_RECEIVED, PurchaseOrder::STATUS_PARTIAL])) {
             return back()->withErrors(['error' => 'PO yang sudah diterima tidak bisa dihapus.']);
         }
 
