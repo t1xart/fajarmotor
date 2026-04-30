@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('new_email');
-            $table->string('otp', 6);
+            $table->string('otp_hash');
             $table->timestamp('expires_at');
             $table->timestamps();
         });

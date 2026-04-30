@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Branch;
 use App\Models\Warehouse;
+use Illuminate\Database\Seeder;
 
 class BranchSeeder extends Seeder
 {
@@ -20,11 +20,11 @@ class BranchSeeder extends Seeder
                 $data
             );
             Warehouse::firstOrCreate(
-                ['code' => 'WH-' . strtoupper(substr($branch->city, 0, 3)) . '-01'],
+                ['code' => 'WH-'.strtoupper(substr($branch->city, 0, 3)).'-01'],
                 [
                     'branch_id' => $branch->id,
-                    'name'      => 'Gudang Utama ' . $branch->name,
-                    'code'      => 'WH-' . strtoupper(substr($branch->city, 0, 3)) . '-01',
+                    'name' => 'Gudang Utama '.$branch->name,
+                    'code' => 'WH-'.strtoupper(substr($branch->city, 0, 3)).'-01',
                 ]
             );
         }

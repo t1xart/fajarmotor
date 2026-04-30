@@ -7,20 +7,18 @@ use App\Models\StockMutation;
 use App\Models\StockRecord;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class StockService
 {
     /**
      * Create a stock mutation for product movement
-     * 
-     * @param Product $product
-     * @param Warehouse $warehouse
-     * @param string $type ('in', 'out', 'adjustment', 'transfer')
-     * @param int $quantity
-     * @param Model|null $reference (Sale, PurchaseOrder, WorkOrder, etc.)
-     * @param array $options Additional options
-     * @return StockMutation
+     *
+     * @param  string  $type  ('in', 'out', 'adjustment', 'transfer')
+     * @param  Model|null  $reference  (Sale, PurchaseOrder, WorkOrder, etc.)
+     * @param  array  $options  Additional options
+     *
      * @throws \Exception
      */
     public function createMutation(
@@ -67,6 +65,30 @@ class StockService
             ]);
 
             return $mutation;
+        });
+    }
+
+    /**
+     * Recalculate stock for a product in a warehouse based on mutation history
+     */
+    public function recalculateStock(Product $product, Warehouse $warehouse): int
+    {
+        return DB::transaction(function () use ($product, $warehouse) {
+            $totalQuantity = (int) StockMutation::where('product_id', $product->id)
+                ->where('warehouse_id', $warehouse->id)
+                ->sum('quantity');
+
+            $totalQuantity = max(0, $totalQuantity);
+
+            StockRecord::updateOrCreate(
+                ['product_id' => $product->id, 'warehouse_id' => $warehouse->id],
+                [
+                    'quantity' => $totalQuantity,
+                    'last_updated' => now(),
+                ]
+            );
+
+            return $totalQuantity;
         });
     }
 
@@ -131,9 +153,9 @@ class StockService
      */
     public function getStockLevel(Product $product, Warehouse $warehouse): int
     {
-        return StockRecord::where('product_id', $product->id)
+        return (int) (StockRecord::where('product_id', $product->id)
             ->where('warehouse_id', $warehouse->id)
-            ->value('quantity') ?? 0;
+            ->value('quantity') ?? 0);
     }
 
     /**
@@ -141,7 +163,7 @@ class StockService
      */
     public function getTotalStockByBranch(Product $product, $branch): int
     {
-        return DB::table('stock_records')
+        return (int) DB::table('stock_records')
             ->join('warehouses', 'stock_records.warehouse_id', '=', 'warehouses.id')
             ->where('stock_records.product_id', $product->id)
             ->where('warehouses.branch_id', $branch->id ?? $branch)
@@ -154,6 +176,7 @@ class StockService
     public function hasSufficientStock(Product $product, Warehouse $warehouse, int $quantity): bool
     {
         $currentStock = $this->getStockLevel($product, $warehouse);
+
         return $currentStock >= $quantity;
     }
 
@@ -174,7 +197,7 @@ class StockService
     /**
      * Get stock mutation history for a product
      */
-    public function getMutationHistory(Product $product, ?Warehouse $warehouse = null, int $limit = 50)
+    public function getMutationHistory(Product $product, ?Warehouse $warehouse = null, int $limit = 50): Collection
     {
         $query = StockMutation::where('product_id', $product->id)
             ->with(['warehouse', 'user', 'reference']);
@@ -198,6 +221,6 @@ class StockService
         }
 
         return (float) $query->get()
-            ->sum(fn($record) => $record->quantity * $product->buy_price);
+            ->sum(fn ($record) => $record->quantity * $product->buy_price);
     }
 }

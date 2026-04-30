@@ -4,12 +4,12 @@ namespace App\Exports;
 
 use App\Models\Product;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class StockReportExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize
+class StockReportExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithTitle
 {
     public function collection()
     {
@@ -24,6 +24,7 @@ class StockReportExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function map($product): array
     {
         $stock = $product->totalStock();
+
         return [
             $product->sku,
             $product->name,
@@ -40,6 +41,6 @@ class StockReportExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function title(): string
     {
-        return 'Laporan Stok ' . now()->format('d-m-Y');
+        return 'Laporan Stok '.now()->format('d-m-Y');
     }
 }

@@ -1,23 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    LandingController,
-    DashboardController,
-    ProductController,
-    StockController,
-    SaleController,
-    PurchaseOrderController,
-    WorkOrderController,
-    SupplierController,
-    ReportController,
-};
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\StockController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\WorkOrderController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -62,7 +60,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     });
 
     // Generate API token from web session
-    Route::post('api/v1/profile/token', [\App\Http\Controllers\Api\ProfileController::class, 'createToken']);
+    Route::post('api/v1/profile/token', [App\Http\Controllers\Api\ProfileController::class, 'createToken']);
 
     // Products
     Route::resource('products', ProductController::class);
@@ -94,12 +92,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Reports — specific sub-routes MUST be declared before the generic 'sales' route
     Route::prefix('reports')->name('reports.')->group(function () {
         // Export routes first to avoid being shadowed by the 'sales' GET route
-        Route::get('sales/pdf',   [ReportController::class, 'exportSalesPdf'])->name('sales.pdf');
+        Route::get('sales/pdf', [ReportController::class, 'exportSalesPdf'])->name('sales.pdf');
         Route::get('sales/excel', [ReportController::class, 'exportSalesExcel'])->name('sales.excel');
         Route::get('stock/excel', [ReportController::class, 'exportStockExcel'])->name('stock.excel');
 
-        Route::get('sales',  [ReportController::class, 'sales'])->name('sales');
-        Route::get('stock',  [ReportController::class, 'stock'])->name('stock');
+        Route::get('sales', [ReportController::class, 'sales'])->name('sales');
+        Route::get('stock', [ReportController::class, 'stock'])->name('stock');
         Route::get('profit', [ReportController::class, 'profit'])->name('profit');
     });
 });

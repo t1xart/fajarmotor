@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -27,9 +27,9 @@ class RoleSeeder extends Seeder
         }
 
         $roles = [
-            'admin'    => $permissions,
-            'cashier'  => ['products.view', 'stock.view', 'sales.view', 'sales.create', 'wo.view'],
-            'warehouse'=> ['products.view', 'stock.view', 'stock.in', 'stock.out', 'stock.adjust', 'stock.transfer', 'po.view', 'po.receive'],
+            'admin' => $permissions,
+            'cashier' => ['products.view', 'stock.view', 'sales.view', 'sales.create', 'wo.view'],
+            'warehouse' => ['products.view', 'stock.view', 'stock.in', 'stock.out', 'stock.adjust', 'stock.transfer', 'po.view', 'po.receive'],
         ];
 
         foreach ($roles as $roleName => $rolePerms) {

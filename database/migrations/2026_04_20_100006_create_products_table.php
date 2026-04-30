@@ -1,10 +1,13 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up(): void {
+return new class extends Migration
+{
+    public function up(): void
+    {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('sku')->unique();
@@ -13,8 +16,8 @@ return new class extends Migration {
             $table->unsignedBigInteger('category_id')->nullable();
             $table->foreign('category_id')->references('id')->on('categories')->nullOnDelete();
             $table->text('description')->nullable();
-            $table->decimal('buy_price', 15, 2)->default(0);
-            $table->decimal('sell_price', 15, 2)->default(0);
+            $table->decimal('buy_price', 12, 2)->default(0);
+            $table->decimal('sell_price', 12, 2)->default(0);
             $table->string('unit')->default('pcs'); // pcs, set, liter, meter
             $table->unsignedInteger('min_stock')->default(5);
             $table->string('shelf_code')->nullable();
@@ -43,7 +46,9 @@ return new class extends Migration {
             $table->unique(['product_id', 'vehicle_type_id']);
         });
     }
-    public function down(): void {
+
+    public function down(): void
+    {
         Schema::dropIfExists('product_compatibility');
         Schema::dropIfExists('product_images');
         Schema::dropIfExists('products');

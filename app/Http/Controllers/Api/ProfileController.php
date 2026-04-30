@@ -16,13 +16,13 @@ class ProfileController extends Controller
         $user = $request->user()->load('branch');
 
         return response()->json([
-            'id'         => $user->id,
-            'name'       => $user->name,
-            'email'      => $user->email,
-            'avatar'     => $user->avatar ? Storage::url($user->avatar) : null,
-            'role'       => $user->getRoleNames()->first(),
-            'branch'     => $user->branch?->only('id', 'name'),
-            'is_active'  => $user->is_active,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $user->avatar ? Storage::url($user->avatar) : null,
+            'role' => $user->getRoleNames()->first(),
+            'branch' => $user->branch?->only('id', 'name'),
+            'is_active' => $user->is_active,
             'created_at' => $user->created_at?->toDateString(),
         ]);
     }
@@ -33,15 +33,15 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $data = $request->validate([
-            'name'  => 'sometimes|required|string|max:100',
-            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'name' => 'sometimes|required|string|max:100',
+            'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
         ]);
 
         $user->update($data);
 
         return response()->json([
             'message' => 'Profil berhasil diperbarui.',
-            'user'    => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
+            'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
         ]);
     }
 
@@ -63,7 +63,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Foto profil berhasil diperbarui.',
-            'avatar'  => Storage::url($path),
+            'avatar' => Storage::url($path),
         ]);
     }
 
@@ -86,12 +86,12 @@ class ProfileController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'password'         => ['required', 'confirmed', Password::min(8)],
+            'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         $user = $request->user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return response()->json(['message' => 'Password saat ini tidak sesuai.'], 422);
         }
 
@@ -103,8 +103,10 @@ class ProfileController extends Controller
     /** POST /api/v1/profile/token — generate new Sanctum token (web session auth) */
     public function createToken(Request $request)
     {
-        $user  = $request->user() ?? auth()->user();
-        if (!$user) return response()->json(['message' => 'Unauthenticated.'], 401);
+        $user = $request->user() ?? auth()->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
 
         // Revoke old tokens with same name to avoid accumulation
         $user->tokens()->where('name', 'profile-api-token')->delete();

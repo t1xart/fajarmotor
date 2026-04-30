@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 
 class SkuService
 {
@@ -28,6 +28,6 @@ class SkuService
 
         $seq = $last ? (int) substr($last, -4) + 1 : 1;
 
-        return $base . str_pad($seq, 4, '0', STR_PAD_LEFT);
+        return $base.str_pad($seq, 4, '0', STR_PAD_LEFT);
     }
 }

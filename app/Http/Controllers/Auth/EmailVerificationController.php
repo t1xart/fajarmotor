@@ -18,6 +18,7 @@ class EmailVerificationController extends Controller
     public function verify(EmailVerificationRequest $request)
     {
         $request->fulfill();
+
         return redirect()->route('dashboard')->with('status', 'Email berhasil diverifikasi!');
     }
 
@@ -27,6 +28,7 @@ class EmailVerificationController extends Controller
             return redirect()->route('dashboard');
         }
         auth()->user()->sendEmailVerificationNotification();
+
         return back()->with('status', 'Link verifikasi telah dikirim ulang ke email Anda.');
     }
 }

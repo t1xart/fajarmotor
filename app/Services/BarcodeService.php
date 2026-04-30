@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Picqer\Barcode\BarcodeGeneratorSVG;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Picqer\Barcode\BarcodeGeneratorSVG;
 
 class BarcodeService
 {
@@ -12,7 +12,8 @@ class BarcodeService
      */
     public static function svg(string $sku): string
     {
-        $generator = new BarcodeGeneratorSVG();
+        $generator = new BarcodeGeneratorSVG;
+
         return $generator->getBarcode($sku, $generator::TYPE_CODE_128, 2, 50);
     }
 
@@ -21,8 +22,9 @@ class BarcodeService
      */
     public static function base64(string $sku): string
     {
-        $generator = new BarcodeGeneratorPNG();
+        $generator = new BarcodeGeneratorPNG;
         $png = $generator->getBarcode($sku, $generator::TYPE_CODE_128, 2, 50);
-        return 'data:image/png;base64,' . base64_encode($png);
+
+        return 'data:image/png;base64,'.base64_encode($png);
     }
 }

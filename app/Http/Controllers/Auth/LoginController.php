@@ -15,6 +15,7 @@ class LoginController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
+
         return view('auth.login');
     }
 
@@ -22,7 +23,7 @@ class LoginController extends Controller
     {
         // ── 1. VALIDASI INPUT (mencegah XSS & SQL Injection via mass input) ──
         $request->validate([
-            'email'    => [
+            'email' => [
                 'required',
                 'string',
                 'email:rfc',
@@ -36,23 +37,23 @@ class LoginController extends Controller
                 'max:128',
             ],
         ], [
-            'email.not_regex'  => 'Format email tidak valid.',
-            'email.email'      => 'Alamat email tidak valid.',
-            'password.min'     => 'Password minimal 6 karakter.',
+            'email.not_regex' => 'Format email tidak valid.',
+            'email.email' => 'Alamat email tidak valid.',
+            'password.min' => 'Password minimal 6 karakter.',
         ]);
 
         // ── 2. SANITASI — strip semua tag HTML dari input ──
-        $email    = strip_tags(trim($request->input('email')));
+        $email = strip_tags(trim($request->input('email')));
         $password = $request->input('password'); // password tidak di-strip (bisa mengandung karakter khusus sah)
 
         // ── 3. CEGAH USER ENUMERATION — pesan error selalu sama ──
         $credentials = ['email' => $email, 'password' => $password];
 
-        if (!Auth::attempt($credentials, false)) {
+        if (! Auth::attempt($credentials, false)) {
             Log::info('Failed login attempt', [
                 'email' => $email,
-                'ip'    => $request->ip(),
-                'ua'    => $request->userAgent(),
+                'ip' => $request->ip(),
+                'ua' => $request->userAgent(),
             ]);
 
             // Pesan error generik — tidak memberi tahu apakah email ada atau tidak
@@ -62,7 +63,7 @@ class LoginController extends Controller
         }
 
         // ── 4. CEK AKUN AKTIF ──
-        if (!Auth::user()->is_active) {
+        if (! Auth::user()->is_active) {
             Auth::logout();
             throw ValidationException::withMessages([
                 'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.',
@@ -75,8 +76,8 @@ class LoginController extends Controller
         // ── 6. LOG LOGIN SUKSES ──
         Log::info('Successful login', [
             'user_id' => Auth::id(),
-            'email'   => $email,
-            'ip'      => $request->ip(),
+            'email' => $email,
+            'ip' => $request->ip(),
         ]);
 
         return redirect()->intended(route('dashboard'));

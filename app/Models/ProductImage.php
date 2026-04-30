@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProductImage extends Model
 {
     protected $fillable = ['product_id', 'image_path', 'is_primary', 'sort_order'];
+
     protected $casts = ['is_primary' => 'boolean'];
 
     // Boot the model to handle primary image constraints
@@ -26,7 +27,7 @@ class ProductImage extends Model
 
         static::saved(function (self $image) {
             // Ensure at least one image is primary if none exists
-            if (!$image->product->images()->where('is_primary', true)->exists()) {
+            if (! $image->product->images()->where('is_primary', true)->exists()) {
                 $image->product->images()
                     ->orderBy('sort_order')
                     ->first()?->update(['is_primary' => true]);

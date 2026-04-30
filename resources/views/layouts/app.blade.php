@@ -434,7 +434,27 @@
         a { color: var(--primary); }
         a:hover { color: var(--primary-dark); }
         .table > :not(caption) > * > * { background-color: transparent; }
+        
+        /* ── MODAL FIX ── */
+        .modal { z-index: 1060; }
         .modal-backdrop { z-index: 1055; }
+        .modal.show { z-index: 1060; pointer-events: auto; }
+        .modal.show .modal-backdrop { z-index: 1055; }
+        .modal-dialog { position: relative; z-index: 1061; }
+        .modal-content { position: relative; z-index: 1061; }
+        .modal-header .btn-close { cursor: pointer; opacity: 0.6; transition: opacity var(--transition); }
+        .modal-header .btn-close:hover { opacity: 1; }
+        .modal-body input, .modal-body select, .modal-body textarea {
+            position: relative;
+            z-index: 1;
+        }
+        .modal-footer button {
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+        }
+        .modal-footer .btn { pointer-events: auto; cursor: pointer; }
+        
         .spinner-border-sm { width: 1rem; height: 1rem; }
         .placeholder { background-color: #e2e8f0; }
         select.form-select option { background: #fff; color: var(--text); }

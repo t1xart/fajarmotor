@@ -1,8 +1,14 @@
 <?php
 
+use App\Exceptions\ApplicationException;
+use App\Http\Middleware\EnsureIsAdmin;
+use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\LoginRateLimiter;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,17 +18,20 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // CORS untuk Expo app (localhost:8081)
+        $middleware->prepend(HandleCors::class);
+
         // Global middleware — security headers pada semua response
-        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        $middleware->append(SecurityHeaders::class);
 
         $middleware->alias([
-            'active'       => \App\Http\Middleware\EnsureUserIsActive::class,
-            'login.limit'  => \App\Http\Middleware\LoginRateLimiter::class,
-            'admin'        => \App\Http\Middleware\EnsureIsAdmin::class,
+            'active' => EnsureUserIsActive::class,
+            'login.limit' => LoginRateLimiter::class,
+            'admin' => EnsureIsAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->renderable(function (\App\Exceptions\ApplicationException $e, $request) {
+        $exceptions->renderable(function (ApplicationException $e, $request) {
             return $e->render($request);
         });
     })->create();

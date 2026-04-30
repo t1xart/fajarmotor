@@ -141,12 +141,12 @@
 </div>
 
 {{-- Checkout Modal --}}
-<div class="modal fade" id="checkoutModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:1rem;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15)">
+<div class="modal fade" id="checkoutModal" tabindex="-1" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered" style="z-index: 1061;">
+        <div class="modal-content" style="border-radius:1rem;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15);position:relative;z-index:1061;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold">Proses Pembayaran</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{{ route('sales.store') }}" id="checkoutForm">
                 @csrf
@@ -191,8 +191,8 @@
                     <div id="cartItemsHidden"></div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn" style="background:#f1f5f9;border:none;color:#64748b" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary px-4 fw-semibold"><i class="fa fa-check me-2"></i>Bayar Sekarang</button>
+                    <button type="button" class="btn" style="background:#f1f5f9;border:none;color:#64748b;cursor:pointer;" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold" style="cursor:pointer;"><i class="fa fa-check me-2"></i>Bayar Sekarang</button>
                 </div>
             </form>
         </div>
@@ -244,9 +244,79 @@ function addToCart(el) {
 function changeQty(id, d) { if (cart[id]) { cart[id].qty = Math.max(1, Math.min(cart[id].stock, cart[id].qty + d)); updateCart(); } }
 function removeItem(id) { delete cart[id]; updateCart(); }
 
-document.querySelectorAll('.product-item:not(.out-of-stock)').forEach(el => el.addEventListener('click', () => addToCart(el)));
-document.getElementById('clearCart').addEventListener('click', () => { cart = {}; updateCart(); });
-document.getElementById('discountInput').addEventListener('input', updateCart);
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup cart event listeners
+    document.querySelectorAll('.product-item:not(.out-of-stock)').forEach(el => el.addEventListener('click', function(e) { 
+        addToCart(this);
+    }, false));
+    
+    const clearCartBtn = document.getElementById('clearCart');
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', function() { cart = {}; updateCart(); }, false);
+    }
+    
+    const discountInput = document.getElementById('discountInput');
+    if (discountInput) {
+        discountInput.addEventListener('input', updateCart, false);
+    }
+    
+    // Setup checkout form
+    const checkoutForm = document.getElementById('checkoutForm');
+    const checkoutModal = document.getElementById('checkoutModal');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (Object.keys(cart).length === 0) {
+                alert('Keranjang masih kosong');
+                return false;
+            }
+            
+            // Populate hidden fields
+            const discountValue = getDiscount();
+            document.getElementById('discountHidden').value = discountValue;
+            
+            const itemsContainer = document.getElementById('cartItemsHidden');
+            itemsContainer.innerHTML = '';
+            Object.values(cart).forEach((item, idx) => {
+                const input1 = document.createElement('input');
+                input1.type = 'hidden';
+                input1.name = `items[${idx}][product_id]`;
+                input1.value = item.id;
+                
+                const input2 = document.createElement('input');
+                input2.type = 'hidden';
+                input2.name = `items[${idx}][quantity]`;
+                input2.value = item.qty;
+                
+                const input3 = document.createElement('input');
+                input3.type = 'hidden';
+                input3.name = `items[${idx}][price]`;
+                input3.value = item.price;
+                
+                itemsContainer.appendChild(input1);
+                itemsContainer.appendChild(input2);
+                itemsContainer.appendChild(input3);
+            });
+            
+            // Show modal
+            const modal = new bootstrap.Modal(checkoutModal);
+            modal.show();
+        }, false);
+    }
+    
+    // Update change on input
+    const paidAmountInput = document.getElementById('paidAmount');
+    if (paidAmountInput) {
+        paidAmountInput.addEventListener('input', function() {
+            const total = Math.max(0, Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0) - getDiscount());
+            const paid = parseFloat(this.value) || 0;
+            const change = Math.max(0, paid - total);
+            document.getElementById('changeDisplay').textContent = fmt(change);
+        }, false);
+    }
+});
 
 document.getElementById('productSearch').addEventListener('input', function() {
     const q = this.value.toLowerCase();

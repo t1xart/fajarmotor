@@ -89,14 +89,14 @@
 </div>
 
 {{-- Adjust Modal --}}
-<div class="modal fade" id="adjustModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:1rem;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15)">
+<div class="modal fade" id="adjustModal" tabindex="-1" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered" style="z-index: 1061;">
+        <div class="modal-content" style="border-radius:1rem;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15);position:relative;z-index:1061;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold">Sesuaikan Stok</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('stock.adjust') }}">
+            <form id="stockAdjustForm" method="POST" action="{{ route('stock.adjust') }}" enctype="application/x-www-form-urlencoded">
                 @csrf
                 <div class="modal-body row g-3">
                     <div class="col-12">
@@ -111,6 +111,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Gudang</label>
                         <select name="warehouse_id" class="form-select" required>
+                            <option value="">— Pilih Gudang —</option>
                             @foreach($warehouses as $wh)
                                 <option value="{{ $wh->id }}">{{ $wh->name }}</option>
                             @endforeach
@@ -119,6 +120,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Tipe</label>
                         <select name="type" class="form-select" id="adjustType" required>
+                            <option value="">— Pilih Tipe —</option>
                             <option value="in">Stok Masuk</option>
                             <option value="out">Stok Keluar</option>
                             <option value="adjustment">Penyesuaian</option>
@@ -127,11 +129,12 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jumlah</label>
-                        <input type="number" name="quantity" class="form-control" required min="1">
+                        <input type="number" name="quantity" class="form-control" placeholder="0" required min="0">
                     </div>
-                    <div class="col-md-6" id="toWarehouseField" style="display:none">
+                    <div class="col-md-6" id="toWarehouseField" style="display:none;margin-top:0;">
                         <label class="form-label">Gudang Tujuan</label>
                         <select name="to_warehouse_id" class="form-select">
+                            <option value="">— Pilih Gudang —</option>
                             @foreach($warehouses as $wh)
                                 <option value="{{ $wh->id }}">{{ $wh->name }}</option>
                             @endforeach
@@ -143,8 +146,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn" style="background:#f1f5f9;border:none;color:#64748b" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn" style="background:#f1f5f9;border:none;color:#64748b;cursor:pointer;" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" style="cursor:pointer;">Simpan</button>
                 </div>
             </form>
         </div>
@@ -153,8 +156,47 @@
 @endsection
 @push('scripts')
 <script>
-document.getElementById('adjustType').addEventListener('change', function() {
-    document.getElementById('toWarehouseField').style.display = this.value === 'transfer' ? '' : 'none';
+document.addEventListener('DOMContentLoaded', function() {
+    const adjustTypeSelect = document.getElementById('adjustType');
+    const toWarehouseField = document.getElementById('toWarehouseField');
+    const form = document.getElementById('stockAdjustForm');
+    
+    // Handle type change
+    if (adjustTypeSelect) {
+        adjustTypeSelect.addEventListener('change', function() {
+            if (this.value === 'transfer') {
+                toWarehouseField.style.display = 'block';
+            } else {
+                toWarehouseField.style.display = 'none';
+            }
+        });
+    }
+    
+    // Ensure form submission works
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Validation
+            const productId = form.querySelector('[name="product_id"]').value;
+            const warehouseId = form.querySelector('[name="warehouse_id"]').value;
+            const type = form.querySelector('[name="type"]').value;
+            const quantity = form.querySelector('[name="quantity"]').value;
+            
+            if (!productId || !warehouseId || !type || !quantity) {
+                e.preventDefault();
+                alert('Semua field yang wajib harus diisi');
+                return false;
+            }
+            
+            if (type === 'transfer') {
+                const toWarehouseId = form.querySelector('[name="to_warehouse_id"]').value;
+                if (!toWarehouseId) {
+                    e.preventDefault();
+                    alert('Gudang tujuan harus dipilih untuk transfer');
+                    return false;
+                }
+            }
+        });
+    }
 });
 </script>
 @endpush

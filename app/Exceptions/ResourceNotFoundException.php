@@ -13,7 +13,7 @@ class ResourceNotFoundException extends ApplicationException
     {
         $userMessage = "{$resource} tidak ditemukan.";
         $message = "{$resource} not found: {$identifier}";
-        
+
         parent::__construct($message, $userMessage, Response::HTTP_NOT_FOUND);
     }
 }

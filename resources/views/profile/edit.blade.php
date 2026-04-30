@@ -158,9 +158,19 @@
 .toast.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 
 /* ── CROP MODAL ── */
-.crop-modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.75); backdrop-filter: blur(6px); align-items: center; justify-content: center; }
+.crop-modal { 
+    display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.75); 
+    backdrop-filter: blur(6px); align-items: center; justify-content: center; 
+    animation: fadeInBackdrop .2s ease;
+}
 .crop-modal.open { display: flex; }
-.crop-box { background: var(--surface); border-radius: var(--radius); padding: 22px; width: 90%; max-width: 480px; box-shadow: 0 32px 80px rgba(0,0,0,.5); }
+@keyframes fadeInBackdrop { from { background: rgba(0,0,0,0); } to { background: rgba(0,0,0,.75); } }
+.crop-box { 
+    background: var(--surface); border-radius: var(--radius); padding: 22px; 
+    width: 90%; max-width: 480px; box-shadow: 0 32px 80px rgba(0,0,0,.5);
+    position: relative; z-index: 2001; animation: slideUp .3s ease;
+}
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .crop-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
 .crop-wrap { max-height: 320px; overflow: hidden; border-radius: 8px; background: #000; }
 .crop-wrap img { max-width: 100%; display: block; }
@@ -379,8 +389,8 @@
         <h3><i class="fa fa-crop" style="color:var(--primary)"></i>Crop Foto (1:1)</h3>
         <div class="crop-wrap"><img id="cropImg" src="" alt="crop"></div>
         <div class="crop-actions">
-            <button type="button" class="btn-s" onclick="closeCrop()">Batal</button>
-            <button type="button" class="btn-p" onclick="applyCrop()"><i class="fa fa-check"></i>Terapkan</button>
+            <button type="button" class="btn-s" id="cropCancelBtn" style="cursor:pointer;">Batal</button>
+            <button type="button" class="btn-p" id="cropApplyBtn" style="cursor:pointer;"><i class="fa fa-check"></i>Terapkan</button>
         </div>
     </div>
 </div>
@@ -399,6 +409,8 @@
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+
 // ── TABS ──
 function switchTab(id, btn) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -410,19 +422,26 @@ function switchTab(id, btn) {
 // Auto-switch to info tab using data bridge
 const _pd = document.getElementById('page-data');
 if (_pd && _pd.dataset.switchInfo === '1') {
-    const infoBtn = document.querySelector('[onclick="switchTab(\'info\',this)"]');
+    const infoBtn = document.querySelector('[data-tab-info="1"]');
     if (infoBtn) switchTab('info', infoBtn);
 }
 
 // Loading states for OTP forms
-document.getElementById('emailReqForm')?.addEventListener('submit', function() {
-    const btn = document.getElementById('sendOtpBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Mengirim...'; }
-});
-document.getElementById('otpForm')?.addEventListener('submit', function() {
-    const btn = document.getElementById('verifyOtpBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Memverifikasi...'; }
-});
+const emailReqForm = document.getElementById('emailReqForm');
+if (emailReqForm) {
+    emailReqForm.addEventListener('submit', function() {
+        const btn = document.getElementById('sendOtpBtn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Mengirim...'; }
+    });
+}
+
+const otpForm = document.getElementById('otpForm');
+if (otpForm) {
+    otpForm.addEventListener('submit', function() {
+        const btn = document.getElementById('verifyOtpBtn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Memverifikasi...'; }
+    });
+}
 
 // ── CROP ──
 let cropper = null;
@@ -432,14 +451,39 @@ const dropZone    = document.getElementById('dropZone');
 const fileInfo    = document.getElementById('fileInfo');
 const fileErr     = document.getElementById('fileErr');
 const saveBtn     = document.getElementById('savePhotoBtn');
+const cropModal   = document.getElementById('cropModal');
+const cropCancelBtn = document.getElementById('cropCancelBtn');
+const cropApplyBtn = document.getElementById('cropApplyBtn');
 
-avatarInput.addEventListener('change', e => handleFile(e.target.files[0]));
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+if (avatarInput) {
+    avatarInput.addEventListener('change', function(e) { handleFile(e.target.files[0]); });
+}
+
+if (dropZone) {
+    dropZone.addEventListener('dragover', function(e) { 
+        e.preventDefault(); 
+        dropZone.classList.add('drag-over'); 
+    });
+    dropZone.addEventListener('dragleave', function() { 
+        dropZone.classList.remove('drag-over'); 
+    });
+    dropZone.addEventListener('drop', function(e) { 
+        e.preventDefault(); 
+        dropZone.classList.remove('drag-over'); 
+        handleFile(e.dataTransfer.files[0]); 
+    });
+}
+
+if (cropCancelBtn) {
+    cropCancelBtn.addEventListener('click', closeCrop);
+}
+
+if (cropApplyBtn) {
+    cropApplyBtn.addEventListener('click', applyCrop);
+}
 
 function handleFile(file) {
-    fileErr.style.display = 'none';
+    if (fileErr) fileErr.style.display = 'none';
     if (!file) return;
     if (!['image/jpeg','image/png'].includes(file.type)) { showErr('Format harus JPG atau PNG.'); return; }
     if (file.size > MAX) { showErr('Ukuran file melebihi 2MB.'); return; }
@@ -447,86 +491,116 @@ function handleFile(file) {
     reader.onload = e => openCrop(e.target.result);
     reader.readAsDataURL(file);
 }
+
 function openCrop(src) {
-    document.getElementById('cropImg').src = src;
-    document.getElementById('cropModal').classList.add('open');
+    const cropImg = document.getElementById('cropImg');
+    if (cropImg) cropImg.src = src;
+    if (cropModal) cropModal.classList.add('open');
     setTimeout(() => {
         if (cropper) cropper.destroy();
-        cropper = new Cropper(document.getElementById('cropImg'), { aspectRatio: 1, viewMode: 1, autoCropArea: 1 });
+        const img = document.getElementById('cropImg');
+        if (img) {
+            cropper = new Cropper(img, { aspectRatio: 1, viewMode: 1, autoCropArea: 1 });
+        }
     }, 100);
 }
+
 function closeCrop() {
-    document.getElementById('cropModal').classList.remove('open');
+    if (cropModal) cropModal.classList.remove('open');
     if (cropper) { cropper.destroy(); cropper = null; }
-    avatarInput.value = '';
+    if (avatarInput) avatarInput.value = '';
 }
+
 function applyCrop() {
     if (!cropper) return;
     cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob(blob => {
         const url = URL.createObjectURL(blob);
         const prev = document.getElementById('avatarPreview');
         const ini  = document.getElementById('avatarInitials');
-        prev.src = url; prev.style.display = 'block';
+        if (prev) { prev.src = url; prev.style.display = 'block'; }
         if (ini) ini.style.display = 'none';
         const dt = new DataTransfer();
         dt.items.add(new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
-        avatarInput.files = dt.files;
+        if (avatarInput) avatarInput.files = dt.files;
         const mb = (blob.size / 1024 / 1024).toFixed(2);
-        document.getElementById('fileName').textContent = 'avatar.jpg';
-        document.getElementById('fileSize').textContent = ` (${mb} MB)`;
-        fileInfo.style.display = 'flex';
-        saveBtn.disabled = false;
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        if (fileName) fileName.textContent = 'avatar.jpg';
+        if (fileSize) fileSize.textContent = ` (${mb} MB)`;
+        if (fileInfo) fileInfo.style.display = 'flex';
+        if (saveBtn) saveBtn.disabled = false;
         closeCrop();
     }, 'image/jpeg', 0.92);
 }
-function clearFile() {
-    avatarInput.value = ''; fileInfo.style.display = 'none'; saveBtn.disabled = true;
-    @if(auth()->user()?->avatar)
-        document.getElementById('avatarPreview').src = @json(Storage::url(auth()->user()->avatar));
-    @else
-        document.getElementById('avatarPreview').style.display = 'none';
-        const ini = document.getElementById('avatarInitials');
-        if (ini) ini.style.display = 'flex';
-    @endif
-}
-function showErr(msg) { document.getElementById('fileErrMsg').textContent = msg; fileErr.style.display = 'block'; avatarInput.value = ''; }
 
-document.getElementById('photoForm').addEventListener('submit', function() {
-    saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
-});
+function clearFile() {
+    if (avatarInput) avatarInput.value = ''; 
+    if (fileInfo) fileInfo.style.display = 'none'; 
+    if (saveBtn) saveBtn.disabled = true;
+    // Reset avatar preview logic here based on backend data
+}
+
+function showErr(msg) { 
+    const fileErrMsg = document.getElementById('fileErrMsg');
+    if (fileErrMsg) fileErrMsg.textContent = msg; 
+    if (fileErr) fileErr.style.display = 'block'; 
+    if (avatarInput) avatarInput.value = ''; 
+}
+
+const photoForm = document.getElementById('photoForm');
+if (photoForm) {
+    photoForm.addEventListener('submit', function() {
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...'; }
+    });
+}
 
 // ── PASSWORD FORM ──
-function showPwForm() { document.getElementById('pwForm').style.display = 'block'; document.getElementById('pwForm').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-function hidePwForm() { document.getElementById('pwForm').style.display = 'none'; }
+window.showPwForm = function() { 
+    const pwForm = document.getElementById('pwForm');
+    if (pwForm) { pwForm.style.display = 'block'; pwForm.scrollIntoView({ behavior: 'smooth', block: 'start' }); } 
+};
 
-function checkStr(val) {
+window.hidePwForm = function() { 
+    const pwForm = document.getElementById('pwForm');
+    if (pwForm) pwForm.style.display = 'none'; 
+};
+
+window.checkStr = function(val) {
     const el = document.getElementById('pwStr'), fill = document.getElementById('pwFill'), txt = document.getElementById('pwTxt');
+    if (!el) return;
     if (!val) { el.style.display = 'none'; return; }
     el.style.display = 'block';
     let s = 0;
     if (val.length >= 8) s++; if (/[A-Z]/.test(val)) s++; if (/[0-9]/.test(val)) s++; if (/[^A-Za-z0-9]/.test(val)) s++;
     const lvl = [{w:'25%',bg:'#ef4444',t:'Lemah'},{w:'50%',bg:'#f59e0b',t:'Cukup'},{w:'75%',bg:'#3b82f6',t:'Kuat'},{w:'100%',bg:'#10b981',t:'Sangat Kuat'}][Math.max(0,s-1)];
-    fill.style.width = lvl.w; fill.style.background = lvl.bg;
-    txt.textContent = 'Kekuatan: ' + lvl.t; txt.style.color = lvl.bg;
+    if (fill) { fill.style.width = lvl.w; fill.style.background = lvl.bg; }
+    if (txt) { txt.textContent = 'Kekuatan: ' + lvl.t; txt.style.color = lvl.bg; }
+};
+
+const pwChangeForm = document.getElementById('pwChangeForm');
+if (pwChangeForm) {
+    pwChangeForm.addEventListener('submit', function() {
+        const btn = document.getElementById('savePwBtn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...'; }
+    });
 }
 
-document.getElementById('pwChangeForm')?.addEventListener('submit', function() {
-    const btn = document.getElementById('savePwBtn');
-    btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
-});
-
 // ── TOAST ──
-function showToast(msg, type = 'ok') {
+window.showToast = function(msg, type = 'ok') {
     const t = document.getElementById('toast');
+    if (!t) return;
     t.className = `toast ${type}`;
     t.innerHTML = `<i class="fa fa-${type==='ok'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3500);
-}
+};
+
 // Toast from session via data bridge
 if (_pd) {
     if (_pd.dataset.success) showToast(_pd.dataset.success, 'ok');
     else if (_pd.dataset.error) showToast(_pd.dataset.error, 'err');
 }
+
+}); // DOMContentLoaded
 </script>
 @endpush

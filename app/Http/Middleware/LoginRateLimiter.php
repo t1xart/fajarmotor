@@ -11,12 +11,13 @@ class LoginRateLimiter
 {
     // Max attempts before lockout
     private const MAX_ATTEMPTS = 5;
+
     // Lockout duration in seconds
     private const DECAY_SECONDS = 900; // 15 menit
 
     public function handle(Request $request, Closure $next)
     {
-        if (!$request->isMethod('POST')) {
+        if (! $request->isMethod('POST')) {
             return $next($request);
         }
 
@@ -25,11 +26,12 @@ class LoginRateLimiter
         if ($this->isLockedOut($key)) {
             $seconds = Cache::get("login_lockout_until:{$key}") - time();
             Log::warning('Login lockout triggered', [
-                'ip'    => $request->ip(),
+                'ip' => $request->ip(),
                 'email' => $request->input('email'),
             ]);
+
             return back()
-                ->withErrors(['email' => "Terlalu banyak percobaan login. Coba lagi dalam " . ceil($seconds / 60) . " menit."])
+                ->withErrors(['email' => 'Terlalu banyak percobaan login. Coba lagi dalam '.ceil($seconds / 60).' menit.'])
                 ->withInput($request->only('email'));
         }
 
@@ -44,7 +46,7 @@ class LoginRateLimiter
             if ($remaining <= 0) {
                 Cache::put("login_lockout_until:{$key}", time() + self::DECAY_SECONDS, self::DECAY_SECONDS);
                 Log::warning('Account locked after failed attempts', [
-                    'ip'    => $request->ip(),
+                    'ip' => $request->ip(),
                     'email' => $request->input('email'),
                 ]);
             }
@@ -59,7 +61,7 @@ class LoginRateLimiter
     private function throttleKey(Request $request): string
     {
         // Key = hash of email + IP to prevent enumeration
-        return sha1(strtolower($request->input('email', '')) . '|' . $request->ip());
+        return sha1(strtolower($request->input('email', '')).'|'.$request->ip());
     }
 
     private function isLockedOut(string $key): bool
@@ -72,6 +74,7 @@ class LoginRateLimiter
         if ($until && time() >= $until) {
             $this->clearAttempts($key);
         }
+
         return false;
     }
 

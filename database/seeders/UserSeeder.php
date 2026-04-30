@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Branch;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -23,9 +23,9 @@ class UserSeeder extends Seeder
             $user = User::firstOrCreate(
                 ['email' => $data['email']],
                 [
-                    'name'      => $data['name'],
-                    'email'     => $data['email'],
-                    'password'  => Hash::make('password'),
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => Hash::make('password'),
                     'branch_id' => $branch?->id,
                     'is_active' => true,
                 ]

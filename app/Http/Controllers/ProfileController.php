@@ -36,19 +36,19 @@ class ProfileController extends Controller
     public function requestEmailChange(Request $request)
     {
         $request->validate([
-            'new_email' => 'required|email|unique:users,email,' . auth()->id(),
+            'new_email' => 'required|email|unique:users,email,'.auth()->id(),
         ], ['new_email.unique' => 'Email sudah digunakan akun lain.']);
 
         $user = auth()->user();
-        $otp  = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         // Delete any existing OTP for this user
         DB::table('email_change_otps')->where('user_id', $user->id)->delete();
 
         DB::table('email_change_otps')->insert([
-            'user_id'    => $user->id,
-            'new_email'  => $request->new_email,
-            'otp'        => $otp,
+            'user_id' => $user->id,
+            'new_email' => $request->new_email,
+            'otp' => $otp,
             'expires_at' => now()->addMinutes(10),
             'created_at' => now(),
             'updated_at' => now(),
@@ -59,6 +59,7 @@ class ProfileController extends Controller
         } catch (\Exception $e) {
             // Rollback OTP insert if mail fails
             DB::table('email_change_otps')->where('user_id', $user->id)->delete();
+
             return back()->withErrors(['new_email' => 'Gagal mengirim email OTP. Periksa konfigurasi mail server.']);
         }
 
@@ -72,13 +73,13 @@ class ProfileController extends Controller
     {
         $request->validate(['otp' => 'required|digits:6']);
 
-        $user   = auth()->user();
+        $user = auth()->user();
         $record = DB::table('email_change_otps')
             ->where('user_id', $user->id)
             ->where('otp', $request->otp)
             ->first();
 
-        if (!$record) {
+        if (! $record) {
             return back()
                 ->withErrors(['otp' => 'Kode OTP tidak valid.'])
                 ->with('otp_sent', true)
@@ -87,17 +88,18 @@ class ProfileController extends Controller
 
         if (now()->isAfter($record->expires_at)) {
             DB::table('email_change_otps')->where('user_id', $user->id)->delete();
+
             return back()->withErrors(['otp' => 'Kode OTP sudah kedaluwarsa. Silakan minta ulang.']);
         }
 
         $user->update([
-            'email'             => $record->new_email,
+            'email' => $record->new_email,
             'email_verified_at' => now(),
         ]);
 
         DB::table('email_change_otps')->where('user_id', $user->id)->delete();
 
-        return back()->with('success', 'Email berhasil diperbarui ke ' . $record->new_email);
+        return back()->with('success', 'Email berhasil diperbarui ke '.$record->new_email);
     }
 
     /**
@@ -110,7 +112,7 @@ class ProfileController extends Controller
         ], [
             'avatar.image' => 'File harus berupa gambar.',
             'avatar.mimes' => 'Format harus JPG atau PNG.',
-            'avatar.max'   => 'Ukuran file maksimal 2MB.',
+            'avatar.max' => 'Ukuran file maksimal 2MB.',
         ]);
 
         $user = auth()->user();
@@ -150,15 +152,15 @@ class ProfileController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'password'         => 'required|min:8|confirmed',
+            'password' => 'required|min:8|confirmed',
         ], [
-            'password.min'       => 'Password minimal 8 karakter.',
+            'password.min' => 'Password minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         $user = auth()->user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Password saat ini tidak sesuai.']);
         }
 
