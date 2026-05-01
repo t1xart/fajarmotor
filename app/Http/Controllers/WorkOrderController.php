@@ -25,11 +25,15 @@ class WorkOrderController extends Controller
 
     public function index(Request $request): View
     {
-        Gate::authorize('viewAny', WorkOrder::class);
-
         $orders = WorkOrder::with(['branch', 'vehicleType.brand'])
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
-            ->when($request->search, fn ($q) => $q->where('customer_name', 'like', "%{$request->search}%")->orWhere('vehicle_plate', 'like', "%{$request->search}%"))
+            ->when($request->search, function ($q) use ($request) {
+                $q->where(function ($query) use ($request) {
+                    $query->where('customer_name', 'like', "%{$request->search}%")
+                        ->orWhere('vehicle_plate', 'like', "%{$request->search}%")
+                        ->orWhere('wo_number', 'like', "%{$request->search}%");
+                });
+            })
             ->latest()->paginate(20)->withQueryString();
 
         return view('work-orders.index', compact('orders'));
@@ -37,8 +41,6 @@ class WorkOrderController extends Controller
 
     public function create(): View
     {
-        Gate::authorize('create', WorkOrder::class);
-
         $vehicleTypes = VehicleType::with('brand')->where('is_active', true)->get()->groupBy('brand.name');
         $products = Product::where('is_active', true)->get();
 

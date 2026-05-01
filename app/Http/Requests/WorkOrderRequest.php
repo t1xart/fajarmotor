@@ -26,9 +26,9 @@ class WorkOrderRequest extends FormRequest
             'service_fee' => 'nullable|numeric|min:0|max:999999999',
             'items' => 'nullable|array',
             'items.*.product_id' => 'nullable|exists:products,id',
-            'items.*.description' => 'required_with:items.*.product_id|string|max:1000',
-            'items.*.quantity' => 'required_with:items.*.product_id|integer|min:1|max:99999',
-            'items.*.price' => 'required_with:items.*.product_id|numeric|min:0|max:999999999',
+            'items.*.description' => 'required|string|max:1000',
+            'items.*.quantity' => 'required|integer|min:1|max:99999',
+            'items.*.price' => 'required|numeric|min:0|max:999999999',
         ];
     }
 

@@ -23,7 +23,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="text-muted mb-1" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em">Kendaraan</div>
-                    <div class="fw-semibold">{{ $workOrder->vehicleType?->brand->name }} {{ $workOrder->vehicleType?->name }} {{ $workOrder->vehicle_year }}</div>
+                    <div class="fw-semibold">{{ $workOrder->vehicleType?->brand?->name }} {{ $workOrder->vehicleType?->name }} {{ $workOrder->vehicle_year }}</div>
                     @if($workOrder->vehicle_plate)<div class="text-muted font-monospace" style="font-size:.78rem">{{ $workOrder->vehicle_plate }}</div>@endif
                 </div>
                 @if($workOrder->complaint)

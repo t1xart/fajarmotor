@@ -51,7 +51,7 @@
                         <div class="text-muted" style="font-size:.72rem">{{ $wo->customer_phone }}</div>
                     </td>
                     <td>
-                        <div style="font-size:.78rem">{{ $wo->vehicleType?->brand->name }} {{ $wo->vehicleType?->name }}</div>
+                        <div style="font-size:.78rem">{{ $wo->vehicleType?->brand?->name }} {{ $wo->vehicleType?->name }}</div>
                         <div class="text-muted font-monospace" style="font-size:.72rem">{{ $wo->vehicle_plate }}</div>
                     </td>
                     <td class="fw-semibold">Rp {{ number_format($wo->total, 0, ',', '.') }}</td>

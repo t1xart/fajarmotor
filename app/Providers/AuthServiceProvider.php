@@ -13,6 +13,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Product::class => ProductPolicy::class,
         Sale::class => SalePolicy::class,
+        \App\Models\WorkOrder::class => \App\Policies\WorkOrderPolicy::class,
     ];
 
     public function boot(): void
