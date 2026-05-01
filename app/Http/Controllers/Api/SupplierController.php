@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SupplierResource;
 use App\Models\Supplier;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 class SupplierController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
         $suppliers = Supplier::when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%")->orWhere('code', 'like', "%{$request->search}%"))
             ->when($request->is_active !== null, fn ($q) => $q->where('is_active', $request->boolean('is_active')))
@@ -18,12 +23,12 @@ class SupplierController extends Controller
         return SupplierResource::collection($suppliers);
     }
 
-    public function show(Supplier $supplier)
+    public function show(Supplier $supplier): SupplierResource
     {
         return new SupplierResource($supplier);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         try {
             $data = $request->validate([
@@ -37,12 +42,18 @@ class SupplierController extends Controller
             $supplier = Supplier::create($data);
 
             return $this->successResponse(new SupplierResource($supplier), 'Supplier berhasil ditambahkan.', 201);
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal menambahkan supplier: '.$e->getMessage(), null, 500);
+        } catch (QueryException $e) {
+            Log::error('Supplier create failed', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Gagal menambahkan supplier.', null, Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (\Throwable $e) {
+            Log::error('Unexpected supplier create error', ['error' => $e->getMessage()]);
+
+            return $this->errorResponse('Terjadi kesalahan server.', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    public function update(Request $request, Supplier $supplier)
+    public function update(Request $request, Supplier $supplier): JsonResponse
     {
         try {
             $supplier->update($request->validate([
@@ -54,8 +65,14 @@ class SupplierController extends Controller
             ]));
 
             return $this->successResponse(new SupplierResource($supplier->fresh()), 'Supplier berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return $this->errorResponse('Gagal memperbarui supplier: '.$e->getMessage(), null, 500);
+        } catch (QueryException $e) {
+            Log::error('Supplier update failed', ['supplier_id' => $supplier->id, 'error' => $e->getMessage()]);
+
+            return $this->errorResponse('Gagal memperbarui supplier.', null, Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (\Throwable $e) {
+            Log::error('Unexpected supplier update error', ['supplier_id' => $supplier->id, 'error' => $e->getMessage()]);
+
+            return $this->errorResponse('Terjadi kesalahan server.', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
