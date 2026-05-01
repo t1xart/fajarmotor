@@ -10,14 +10,18 @@ use App\Models\StockMutation;
 use App\Models\StockRecord;
 use App\Models\Warehouse;
 use App\Services\StockService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use InvalidArgumentException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 
 class StockController extends Controller
 {
     public function __construct(protected StockService $stockService) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $stocks = StockRecord::with(['product.category', 'warehouse.branch'])
             ->when($request->warehouse_id, fn ($q) => $q->where('warehouse_id', $request->warehouse_id))
@@ -47,7 +51,7 @@ class StockController extends Controller
         ]);
     }
 
-    public function mutations(Request $request)
+    public function mutations(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $mutations = StockMutation::with(['product', 'warehouse', 'user'])
             ->when($request->product_id, fn ($q) => $q->where('product_id', $request->product_id))
@@ -58,7 +62,7 @@ class StockController extends Controller
         return StockMutationResource::collection($mutations);
     }
 
-    public function adjust(StockAdjustRequest $request)
+    public function adjust(StockAdjustRequest $request): JsonResponse
     {
         try {
             DB::transaction(function () use ($request) {
@@ -71,7 +75,7 @@ class StockController extends Controller
 
                     if (! $this->stockService->hasSufficientStock($product, $warehouse, $quantity)) {
                         $available = $this->stockService->getStockLevel($product, $warehouse);
-                        throw new \Exception("Stok tidak cukup untuk transfer. Tersedia: {$available}, diminta: {$quantity}");
+                        throw new InvalidArgumentException("Stok tidak cukup untuk transfer. Tersedia: {$available}, diminta: {$quantity}");
                     }
 
                     $this->stockService->transferStock($product, $warehouse, $toWarehouse, $quantity, null, ['notes' => $request->notes]);
@@ -91,7 +95,7 @@ class StockController extends Controller
                 // in / out
                 if ($request->type === 'out' && ! $this->stockService->hasSufficientStock($product, $warehouse, $quantity)) {
                     $available = $this->stockService->getStockLevel($product, $warehouse);
-                    throw new \Exception("Stok tidak cukup. Tersedia: {$available}, diminta: {$quantity}");
+                    throw new InvalidArgumentException("Stok tidak cukup. Tersedia: {$available}, diminta: {$quantity}");
                 }
 
                 $mutationQty = $request->type === 'out' ? -$quantity : $quantity;
@@ -99,8 +103,14 @@ class StockController extends Controller
             });
 
             return $this->successResponse(null, 'Stok berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), null, 422);
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Produk atau gudang tidak ditemukan.', null, Response::HTTP_NOT_FOUND);
+        } catch (InvalidArgumentException $e) {
+            return $this->errorResponse($e->getMessage(), null, Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return $this->errorResponse('Terjadi kesalahan server saat update stok.', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
