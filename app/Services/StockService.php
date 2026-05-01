@@ -30,11 +30,25 @@ class StockService
         array $options = []
     ): StockMutation {
         return DB::transaction(function () use ($product, $warehouse, $type, $quantity, $reference, $options) {
-            // Get current stock
-            $stock = StockRecord::firstOrCreate(
-                ['product_id' => $product->id, 'warehouse_id' => $warehouse->id],
-                ['quantity' => 0]
-            );
+            // Lock stock record row to prevent race conditions that can desynchronize stock
+            $stock = StockRecord::where('product_id', $product->id)
+                ->where('warehouse_id', $warehouse->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $stock) {
+                StockRecord::create([
+                    'product_id' => $product->id,
+                    'warehouse_id' => $warehouse->id,
+                    'quantity' => 0,
+                    'last_updated' => now(),
+                ]);
+
+                $stock = StockRecord::where('product_id', $product->id)
+                    ->where('warehouse_id', $warehouse->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+            }
 
             $quantityBefore = $stock->quantity;
             $quantityAfter = $quantityBefore + $quantity;
